@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::controller(AuthController::class)->group(function(){
     Route::post('register', 'register');
     Route::post('login', 'login');
+});
+
+Route::controller(VerifyEmailController::class)->group(function (){
+    Route::post('verify/email', 'verifyEmail');
+    Route::post('resend/email', 'resendEmail');
 });
 
 Route::middleware('auth:sanctum')->group(function(){

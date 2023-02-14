@@ -25,25 +25,22 @@ class ProjectController extends Controller
     {
         $this->authorize('project-create');
 
-        $request->validate([
-            'user_id' => ['nullable'],
-            'name' => ['required'],
-        ]);
+        $data = $request->validate($this->rules());
 
-        Project::create($request->all());
+        $project = Project::create($data);
+
+        $project->users()->attach($data['users']);
 
         return response(['message' => 'Project created successfully'], 200);
     }
 
     public function edit(Request $request, Project $project)
     {
-        $this->authorize('project-edit');
+        $this->authorize('project-edit', $project);
 
         if($request->isMethod('POST')){
-            $request->validate([
-                'user_id' => ['nullable'],
-                'name' => ['required'],
-            ]);
+            $request->validate($this->rules());
+
             $project->update($request->all());
 
             return response(['message' => 'Project updated successfully'], 200);
@@ -59,5 +56,18 @@ class ProjectController extends Controller
         $project->delete();
 
         return response(['message' => 'Project deleted successfully'], 200);
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'users' => ['nullable'],
+            'name' => ['required'],
+            'company_id' => ['required', 'exists:companies,id'],
+            'start_period' => ['required', 'date'],
+            'end_period' => ['required', 'date'],
+            'supervisor_conf' => ['boolean'],
+            'audit_conf' => ['boolean'],
+        ];
     }
 }

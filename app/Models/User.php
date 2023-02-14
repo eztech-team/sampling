@@ -68,4 +68,16 @@ class User extends Authenticatable
     {
         return $this->abilities->pluck('name')->unique();
     }
+
+    public function userProjects()
+    {
+        return $this->belongsToMany(Project::class, 'permission_project_user', 'id', 'user_id');
+    }
+
+
+    public function userProjectPermission(Project $project, $permission_id)
+    {
+        return $project->where('permission_id', $permission_id)->first() ? true : false;
+    }
+
 }

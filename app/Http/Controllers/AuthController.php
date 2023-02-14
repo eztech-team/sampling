@@ -22,11 +22,11 @@ class AuthController extends Controller
             'middle_name' => ['nullable', 'max:255'],
             'city_id'=> ['required', 'exists:city'],
             'iin' => ['required', 'min:12', 'max:12', 'numeric', 'unique:users'],
-            'email' => ['required', 'unique:users', 'max:255'],
+            'email' => ['required', 'unique:users', 'max:255', 'email'],
             'phone_number' => ['required', 'unique:users']
         ]);
 
-        return response(['token' => $this->service->register($data)], 200);
+        return response(['email' => $this->service->register($data)], 200);
     }
 
     public function login(Request $request)

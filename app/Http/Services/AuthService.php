@@ -12,7 +12,7 @@ class AuthService
         $user = User::create($data);
         $user->roles()->attach(Role::ADMIN);
 
-        return request()->user()->createToken(\Str::random(10))->plainTextToken;
+        return $user->email;
     }
 
     public function login($data): String
