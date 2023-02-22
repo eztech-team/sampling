@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('iik')->unique(); // ИИК
             $table->string('phone_number'); // Контакный номер
             $table->string('full_name'); // ФИО руководителя
+            $table->boolean('active')->default(0);
             $table->timestamps();
         });
     }

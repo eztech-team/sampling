@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\AuthService;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -20,7 +21,7 @@ class AuthController extends Controller
             'name' => ['required', 'max:255'],
             'surname' => ['required', 'max:255'],
             'middle_name' => ['nullable', 'max:255'],
-            'city_id'=> ['required', 'exists:city'],
+            'city_id'=> ['required', 'exists:cities'],
             'iin' => ['required', 'min:12', 'max:12', 'numeric', 'unique:users'],
             'email' => ['required', 'unique:users', 'max:255', 'email'],
             'phone_number' => ['required', 'unique:users']

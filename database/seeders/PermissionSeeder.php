@@ -53,12 +53,30 @@ class PermissionSeeder extends Seeder
             'label' => 'delete',
         ]);
 
+        //Team
+        Permission::create([
+            'name' => 'team-index',
+            'label' => 'index',
+        ]);
+        Permission::create([
+            'name' => 'team-create',
+            'label' => 'create',
+        ]);
+        Permission::create([
+            'name' => 'team-edit',
+            'label' => 'edit',
+        ]);
+        Permission::create([
+            'name' => 'team-delete',
+            'label' => 'delete',
+        ]);
+
         $permissionsAdmin = Permission::all();
         $permissionsUser = Permission::where('name', '=', "%test%")->get();
 
 
         foreach($permissionsAdmin as $permission){
-            $permission->roles()->attach(Role::ADMIN);
+            $permission->roles()->attach(Role::COMPANY_ADMIN);
         }
 
         foreach($permissionsUser as $permission){

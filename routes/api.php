@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Http\Request;
@@ -32,11 +33,18 @@ Route::controller(VerifyEmailController::class)->group(function (){
 });
 
 Route::middleware('auth:sanctum')->group(function(){
+    Route::group(['prefix' => 'companies'], function (){
+        Route::controller(CompanyController::class)->group(function (){
+            Route::post('/', 'store');
+        });
+    });
     Route::group(['prefix' => 'projects'], function(){
         Route::controller(ProjectController::class)->group(function(){
-            Route::get('index', 'index');
-            Route::post( 'post', 'store');
-            Route::match(['get', 'post'],'edit/{project}', 'edit');
+            Route::get('/', 'index');
+            Route::post( '/', 'store');
+            Route::get('/{project}', 'show');
+
+            Route::post( '/edit/{project}', 'edit');
             Route::delete('delete/{project}', 'destroy');
         });
     });

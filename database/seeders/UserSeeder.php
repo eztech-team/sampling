@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -24,8 +25,20 @@ class UserSeeder extends Seeder
             'city_id' => 1,
             'iin' => '000000000000',
             'phone_number' => '77474991203',
-            'role_id' => Role::ADMIN,
+            'role_id' => Role::COMPANY_ADMIN,
             'surname' => 'Admin'
+        ]);
+
+        Company::create([
+            'active' => true,
+            'bank_name' => 'Kaspi bank',
+            'bik' => '12345678',
+            'bin' => '12345678',
+            'full_name' => 'Admin Adminov Admin',
+            'iik' => '12345678',
+            'name' => 'TOO ADMIN',
+            'phone_number' => '123456789',
+            'user_id' => $admin->id,
         ]);
 
         $user = User::create([

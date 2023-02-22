@@ -14,7 +14,11 @@ class TeamController extends Controller
      */
     public function index()
     {
-        //
+        $this->authorize('team-index');
+
+        $teams = Team::whereHas('company')->with('users')->get();
+
+        return response($teams, 200);
     }
 
     /**
@@ -25,7 +29,17 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->authorize('team-store');
+
+        $request->validate([
+            'name' => ['required', 'max:255'],
+            'users' => ['nullable'],
+        ]);
+
+        $team = Team::create($request->all());
+        $team->users()->attach($request->users);
+
+        return response(['message' => 'Team created successfully'], 200);
     }
 
     /**
@@ -36,7 +50,9 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
-        //
+        $this->authorize('team-edit');
+
+        return response($team->load('users'), 200);
     }
 
     /**
@@ -48,7 +64,17 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
-        //
+        $this->authorize('team-edit');
+
+        $request->validate([
+            'name' => ['required', 'max:255'],
+            'users' => ['nullable'],
+        ]);
+
+        $team->update($request->all());
+        $team->users()->sync($request->users);
+
+        return response(['message' => 'Team updated successfully'], 200);
     }
 
     /**
@@ -59,6 +85,10 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
-        //
+        $this->authorize('team-delete');
+
+        $team->delete();
+
+        return response(['message' => 'Team deleted successfully'], 200);
     }
 }

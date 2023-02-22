@@ -16,7 +16,13 @@ class ProjectController extends Controller
     {
         $this->authorize('project-index');
 
-        $projects = Project::get();
+        $projects = Project::whereHas('users', function ($q){
+            $q->where('id', auth('sanctum')->id());
+        })
+            ->orWhereHas('projectPermission', function ($q){
+                $q->where('user_id', auth('sanctum')->id());
+            })
+            ->get();
 
         return response($projects, 200);
     }
@@ -29,6 +35,7 @@ class ProjectController extends Controller
 
         $project = Project::create($data);
 
+        $project->users()->attach(auth('sanctum')->id());
         $project->users()->attach($data['users']);
 
         return response(['message' => 'Project created successfully'], 200);
@@ -38,13 +45,17 @@ class ProjectController extends Controller
     {
         $this->authorize('project-edit', $project);
 
-        if($request->isMethod('POST')){
             $request->validate($this->rules());
 
             $project->update($request->all());
 
             return response(['message' => 'Project updated successfully'], 200);
-        }
+
+    }
+
+    public function show(Project $project)
+    {
+        $this->authorize('project-edit', $project);
 
         return response($project, 200);
     }

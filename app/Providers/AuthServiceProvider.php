@@ -32,9 +32,13 @@ class AuthServiceProvider extends ServiceProvider
             if($user->rolePermissions()->contains($permission) || $user->userAbilities()->contains($permission)){
                 return true;
             }
-            if($permission = Permission::where('name', $permission)->first()){
-                return $user->userProjectPermission($project, $permission->id);
+
+            if(request()->isMethod('put') || request()->isMethod('edit')){
+                if($permission = Permission::where('name', $permission)->first()){
+                    return $user->userProjectPermission($project[0]->id, $permission->id);
+                }
             }
+
             return false;
         });
     }

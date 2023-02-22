@@ -75,9 +75,9 @@ class User extends Authenticatable
     }
 
 
-    public function userProjectPermission(Project $project, $permission_id)
+    public function userProjectPermission($project_id, $permission_id)
     {
-        return $project->where('permission_id', $permission_id)->first() ? true : false;
+        return (bool)UserProjectPermission::where('permission_id', $permission_id)->where('project_id', $project_id)->first();
     }
 
 }
