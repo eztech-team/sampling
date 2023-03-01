@@ -14,7 +14,7 @@ class AuthService
 {
     use Message;
 
-    public function register($data): array
+    public function register($data)
     {
         $data['role_id'] = Role::ADMIN;
         $user = User::create($data);
