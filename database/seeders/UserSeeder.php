@@ -29,11 +29,13 @@ class UserSeeder extends Seeder
             'email_verification_send' => now()
         ]);
 
-        Company::create([
+        $company = Company::create([
             'active' => true,
             'name' => 'TOO ADMIN',
             'user_id' => $admin->id,
         ]);
+
+        $company->users()->attach($admin->id);
 
         $user = User::create([
             'password' => Hash::make('password'),
