@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\AuthService;
 use App\Http\Traits\Message;
 use App\Mail\SendCodeMail;
 use App\Models\User;
+use App\Models\UserEmailCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -16,14 +18,14 @@ class VerifyEmailController extends Controller
 
     use Message;
 
-    public function verifyEmail(Request $request)
+    public function verifyEmail(Request $request, AuthService $service)
     {
         $request->validate([
             'code'         => ['required', 'regex:/^\d{4}$/'],
             'email'        => ['email', 'required'],
         ]);
 
-        $user = User::where('email', $request->email)
+        $user = UserEmailCode::where('email', $request->email)
                     ->first()
         ;
 
@@ -34,14 +36,18 @@ class VerifyEmailController extends Controller
         $isRegisteringByEmail = !$user->email_verified_at;
 
         if ($isRegisteringByEmail) {
-            $user->update([
+            $createdUser = $service->createUser($user);
+
+            $createdUser->update([
                 'code' => null,
                 'email_verified_at' => now(),
             ]);
 
+            $user->delete();
+
             return response(
                 [
-                    'token' => $user->createToken('API Token')->plainTextToken,
+                    'token' => $createdUser->createToken('API Token')->plainTextToken,
                 ],
                 200
             );

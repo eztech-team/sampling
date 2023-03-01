@@ -14,7 +14,7 @@ trait Message
         $code = 1111;
 
         if (!$user->email_verification_send or Carbon::create($user->email_verification_send)
-                ->addSeconds(60) >= Carbon::now()) {
+                ->addSeconds(60) <= Carbon::now()) {
             $user->update(['code' => $code]);
 
 //            Mail::to($user->email)

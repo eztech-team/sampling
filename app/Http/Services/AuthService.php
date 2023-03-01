@@ -14,21 +14,26 @@ class AuthService
 {
     use Message;
 
-    public function register($data)
+    public function createUser($data)
     {
-        $data['role_id'] = Role::ADMIN;
-        $user = User::create($data);
+        $user = User::create([
+            'email' => $data->email,
+            'role_id' => $data->role_id,
+            'password' => $data->password,
+            'name' => $data->name,
+            'surname' => $data->surname,
+            'country_id' => $data->country_id,
+            'city_id' => $data->city_id
+        ]);
 
         $company = Company::create([
             'user_id' => $user->id,
-            'name' => $data['company_name']
+            'name' => $data->company_name
         ]);
 
         $company->user()->attach($user->id);
 
-        $this->sendCodeToUserEmail($user);
-
-        return $user->email;
+        return $user;
     }
 
     public function login($data): String
@@ -40,5 +45,12 @@ class AuthService
         }
 
         return request()->user()->createToken(\Str::random(10))->plainTextToken;
+    }
+
+    public function sendCodeToEmail($request)
+    {
+        $this->sendCodeToUserEmail($request);
+
+        return $request->email;
     }
 }
