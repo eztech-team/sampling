@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
 
@@ -11,6 +12,11 @@ class AuthService
     {
         $user = User::create($data);
         $user->roles()->attach(Role::ADMIN);
+
+        Company::create([
+            'user_id' => $user->id,
+            'name' => $data['company_name']
+        ]);
 
         return $user->email;
     }

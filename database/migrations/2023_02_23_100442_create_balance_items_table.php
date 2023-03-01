@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Country;
+use App\Models\Project;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,10 +14,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('cities', function (Blueprint $table) {
+        Schema::create('balance_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Country::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Project::class)->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->string('description')->nullable();
+            $table->json('array_table');
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cities');
+        Schema::dropIfExists('balance_items');
     }
 };
