@@ -20,14 +20,16 @@ class AuthController extends Controller
         $data = $request->validate([
             'name' => ['required', 'max:255'],
             'surname' => ['required', 'max:255'],
-            'company_name' => ['required', 'max:255'],
-            'country_id' => ['required', 'exists:country'],
-            'city_id'=> ['required', 'exists:cities'],
-            'login' => ['required', 'min:12', 'max:12', 'numeric', 'unique:users'],
+            'company_name' => ['required', 'max:255', 'unique:companies,name'],
+            'country_id' => ['required', 'exists:countries,id'],
+            'city_id'=> ['required', 'exists:cities,id'],
+            'login' => ['required', 'unique:users'],
             'email' => ['required', 'unique:users', 'max:255', 'email'],
+            'password' => ['required', 'max:20'],
+            'conf_password' => ['required', 'same:password']
         ]);
 
-        return response(['email' => $this->service->register($data)], 200);
+        return response($this->service->register($data), 200);
     }
 
     public function login(Request $request)

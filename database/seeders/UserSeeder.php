@@ -26,7 +26,8 @@ class UserSeeder extends Seeder
             'city_id' => 1,
             'login' => 'admin',
             'role_id' => Role::COMPANY_ADMIN,
-            'surname' => 'Admin'
+            'surname' => 'Admin',
+            'email_verification_send' => now()
         ]);
 
         Company::create([

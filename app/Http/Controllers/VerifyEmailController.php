@@ -19,7 +19,7 @@ class VerifyEmailController extends Controller
     public function verifyEmail(Request $request)
     {
         $request->validate([
-            'code'         => ['required', 'regex:/^\d{6}$/'],
+            'code'         => ['required', 'regex:/^\d{4}$/'],
             'email'        => ['email', 'required'],
         ]);
 

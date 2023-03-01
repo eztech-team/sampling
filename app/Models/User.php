@@ -20,13 +20,12 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'surname',
-        'middle_name',
         'city_id',
-        'iin',
+        'country_id',
         'email',
-        'phone_number',
         'password',
         'role_id',
+        'login',
     ];
 
     /**
@@ -46,6 +45,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'email_verification_send' => 'datetime',
     ];
 
     public function role()
