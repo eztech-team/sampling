@@ -36,15 +36,18 @@ class AuthService
         return $user;
     }
 
-    public function login($data): String
+    public function login($data)
     {
         $user = \Auth::attempt($data);
 
         if(!$user){
-            return response(['message' => 'Unauthorized'], 401);
+            return ['status' => false];
         }
 
-        return response(['token' => request()->user()->createToken(\Str::random(10))->plainTextToken], 200);
+        return [
+            'status' => true,
+            'token' => request()->user()->createToken(\Str::random(10))->plainTextToken
+        ];
     }
 
     public function sendCodeToEmail($request)

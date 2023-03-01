@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\UserEmailCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -39,8 +40,11 @@ class AuthController extends Controller
             'email' => ['required'],
             'password' => ['required'],
         ]);
+        if($this->service->login($data)['status']){
+            return response($this->service->login($data)['token'], 200);
+        }
 
-        return $this->service->login($data);
+        return response(['message' => 'Unauthorized'], 401);
     }
 
     public function register(Request $request)
@@ -57,7 +61,7 @@ class AuthController extends Controller
         ]);
 
         $data['role_id'] = Role::COMPANY_ADMIN;
-        $data['password'] = \Hash::make($data['password']);
+        $data['password'] = Hash::make($data['password']);
 
         $user = UserEmailCode::updateOrCreate(
             [
