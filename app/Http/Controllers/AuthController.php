@@ -41,7 +41,7 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
         if($this->service->login($data)['status']){
-            return response($this->service->login($data)['token'], 200);
+            return response(['token' => $this->service->login($data)['token']], 200);
         }
 
         return response(['message' => 'Unauthorized'], 401);
