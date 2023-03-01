@@ -41,7 +41,7 @@ class ProjectController extends Controller
         return response(['message' => 'Project created successfully'], 200);
     }
 
-    public function edit(Request $request, Project $project)
+    public function update(Request $request, Project $project)
     {
         $this->authorize('project-edit', $project);
 
@@ -50,7 +50,6 @@ class ProjectController extends Controller
             $project->update($request->all());
 
             return response(['message' => 'Project updated successfully'], 200);
-
     }
 
     public function show(Project $project)
@@ -67,6 +66,25 @@ class ProjectController extends Controller
         $project->delete();
 
         return response(['message' => 'Project deleted successfully'], 200);
+    }
+
+    // Общий уровень существенности(general_level) и Рабочий уровень существенности(operating_level)
+    public function updateLevel(Request $request, Project $project)
+    {
+        $this->authorize('project-edit', $project);
+
+        $data = $request->validate([
+            'general_level' => ['required', 'integer'],
+            'operating_level' => ['required', 'integer'],
+        ]);
+
+        if($project->general_level && $project->operating_level){
+            return response('Bad Request', 400);
+        }
+
+        $project->update($data);
+
+        return response(['message' => 'Project updated successfully'], 200);
     }
 
     protected function rules(): array

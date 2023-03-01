@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Country;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,12 +11,16 @@ return new class extends Migration
      *
      * @return void
      */
+
+    // EXCEL FILE
     public function up()
     {
-        Schema::create('cities', function (Blueprint $table) {
+        Schema::create('aggregates', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Country::class)->constrained()->onDelete('cascade');
-            $table->string('name');
+            $table->string('name')->unique();
+            $table->string('path');
+            $table->integer('amount_column');
+            $table->boolean('title')->default(0); // 0 -> without title 1 -> with title
             $table->timestamps();
         });
     }
@@ -29,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cities');
+        Schema::dropIfExists('aggregates');
     }
 };

@@ -12,13 +12,7 @@ class Company extends Model
 
     protected $fillable = [
         'user_id',
-        'bank_name',
         'name',
-        'bin',
-        'bik',
-        'iik',
-        'phone_number',
-        'full_name',
     ];
 
     public function user(): HasMany

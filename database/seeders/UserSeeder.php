@@ -22,22 +22,16 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'email' => 'admin@admin.com',
             'name' => 'Admin',
+            'country_id' => 1,
             'city_id' => 1,
-            'iin' => '000000000000',
-            'phone_number' => '77474991203',
+            'login' => 'admin',
             'role_id' => Role::COMPANY_ADMIN,
             'surname' => 'Admin'
         ]);
 
         Company::create([
             'active' => true,
-            'bank_name' => 'Kaspi bank',
-            'bik' => '12345678',
-            'bin' => '12345678',
-            'full_name' => 'Admin Adminov Admin',
-            'iik' => '12345678',
             'name' => 'TOO ADMIN',
-            'phone_number' => '123456789',
             'user_id' => $admin->id,
         ]);
 
@@ -45,9 +39,9 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'email' => 'user@user.com',
             'name' => 'User',
+            'country_id' => 1,
             'city_id' => 1,
-            'iin' => '000000000001',
-            'phone_number' => '77474991201',
+            'login' => 'user',
             'role_id' => Role::USER,
             'surname' => 'User'
         ]);

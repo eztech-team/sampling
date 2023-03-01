@@ -19,8 +19,11 @@ return new class extends Migration
             $table->string('name');
             $table->date('start_period');
             $table->date('end_period');
-            $table->boolean('supervisor_conf')->default(false);
-            $table->boolean('audit_conf')->default(false);
+            $table->boolean('supervisor_conf')->default(false); // Подтверждение руководителем
+            $table->boolean('audit_conf')->default(false); // Является ли аудит промежуточным
+            $table->integer('general_level')->nullable();
+            $table->integer('operating_level')->nullable();
+            $table->boolean('active')->default(0);
             $table->timestamps();
         });
     }

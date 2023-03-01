@@ -15,7 +15,10 @@ class Project extends Model
         'start_period',
         'end_period',
         'supervisor_conf',
-        'audit_conf'
+        'audit_conf',
+        'active',
+        'general_level',
+        'operating_level'
     ];
 
     public function users()

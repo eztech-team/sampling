@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\City;
+use App\Models\Company;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,6 +16,7 @@ class CitySeeder extends Seeder
      */
     public function run()
     {
+
         $cities = [
             "Астана",
             "Актау",
@@ -48,8 +50,12 @@ class CitySeeder extends Seeder
             "Экибастуз",
             "Другое",
         ];
+        Company::create([
+            'name' => 'Казахстан'
+        ]);
         foreach($cities as $city){
             City::create([
+                'country_id' => 1,
                 'name' => $city,
             ]);
         }

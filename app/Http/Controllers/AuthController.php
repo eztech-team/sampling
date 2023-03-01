@@ -20,11 +20,11 @@ class AuthController extends Controller
         $data = $request->validate([
             'name' => ['required', 'max:255'],
             'surname' => ['required', 'max:255'],
-            'middle_name' => ['nullable', 'max:255'],
+            'company_name' => ['required', 'max:255'],
+            'country_id' => ['required', 'exists:country'],
             'city_id'=> ['required', 'exists:cities'],
-            'iin' => ['required', 'min:12', 'max:12', 'numeric', 'unique:users'],
+            'login' => ['required', 'min:12', 'max:12', 'numeric', 'unique:users'],
             'email' => ['required', 'unique:users', 'max:255', 'email'],
-            'phone_number' => ['required', 'unique:users']
         ]);
 
         return response(['email' => $this->service->register($data)], 200);
@@ -33,7 +33,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate([
-            'iin' => ['required'],
+            'login' => ['required'],
             'password' => ['required'],
         ]);
 
