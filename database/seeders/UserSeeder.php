@@ -24,7 +24,6 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'country_id' => 1,
             'city_id' => 1,
-            'login' => 'admin',
             'role_id' => Role::COMPANY_ADMIN,
             'surname' => 'Admin',
             'email_verification_send' => now()
@@ -42,7 +41,6 @@ class UserSeeder extends Seeder
             'name' => 'User',
             'country_id' => 1,
             'city_id' => 1,
-            'login' => 'user',
             'role_id' => Role::USER,
             'surname' => 'User'
         ]);
