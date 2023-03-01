@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\City;
 use App\Models\Company;
+use App\Models\Country;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -50,7 +51,7 @@ class CitySeeder extends Seeder
             "Экибастуз",
             "Другое",
         ];
-        Company::create([
+        Country::create([
             'name' => 'Казахстан'
         ]);
         foreach($cities as $city){
