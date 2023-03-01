@@ -13,6 +13,7 @@ class Company extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'active',
     ];
 
     public function users(): BelongsToMany

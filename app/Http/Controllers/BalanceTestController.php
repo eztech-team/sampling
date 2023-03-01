@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BalanceItem;
 use App\Models\BalanceTest;
+use App\Rules\NatureControlRule;
 use Illuminate\Http\Request;
 
 class BalanceTestController extends Controller
@@ -55,23 +56,25 @@ class BalanceTestController extends Controller
                 'nature_control_id' => $request->nature_control_id,
                 'balance_item_id' => $request->balance_item_id
             ]);
+
+            //check logic
+            /*
+             * if check logics error 0 status = 1
+             * else status = 0
+             * */
         }
 
-
         if($request->balance_id){
+            $balanceTest = BalanceTest::find($request->balance_id);
             $request->validate([
                 'size' => ['required', 'integer'],
+                'nature_control_id' => [
+                    'exists:nature_controls,id',
+                    new NatureControlRule($balanceTest->nature_control_id, $balanceTest->id)]
             ]);
-            $balanceTest = BalanceTest::find($request->balance_id);
+
             $balanceTest->update([
-                'name' => $request->name,
                 'second_size' => $request->size,
-                'array_table' => $request->array_table,
-                'aggregate_id' => $request->aggregate_id,
-                'deviation' => $request->deviation,
-                'effectiveness' => $request->effectiveness,
-                'nature_control_id' => $request->nature_control_id,
-                'balance_item_id' => $request->balance_item_id
             ]);
         }
 

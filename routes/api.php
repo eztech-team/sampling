@@ -7,9 +7,11 @@ use App\Http\Controllers\BalanceTestController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\IncomeItemController;
+use App\Http\Controllers\NatureControlController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\VerifyEmailController;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +31,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('excel', [ExcelController::class, 'store']);
+Route::post('company/accept', function (){
+    $companyID = request()->company_id;
+    $company = Company::find($companyID);
+    $company->active = true;
+    $company->save();
+
+    return response('OK', 200);
+});
 
 Route::controller(AuthController::class)->group(function(){
     Route::post('register', 'register');
@@ -97,16 +107,24 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::delete('/{incomeItem}', 'destroy')->middleware('check.project');;
         });
     });
-
     /*
      * TOC”s
      * */
-
     Route::group(['prefix' => 'toc-s'], function (){
         Route::controller(BalanceTestController::class)->group(function (){
             Route::get('/{project_id}', 'index');
             Route::post('/', 'store');
             Route::get('/{balanceTest}', 'show');
+        });
+    });
+    /*
+     * Nature of control and frequency of performance
+     * */
+    Route::group(['prefix' => 'nature-control'], function (){
+        Route::controller(NatureControlController::class)->group(function (){
+            Route::get('/', 'index');
+//            Route::post('/', 'store');
+//            Route::get('/{balanceTest}', 'show');
         });
     });
 });

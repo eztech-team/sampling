@@ -40,8 +40,9 @@ class AuthController extends Controller
             'email' => ['required'],
             'password' => ['required'],
         ]);
-        if($this->service->login($data)['status']){
-            return response(['token' => $this->service->login($data)['token']], 200);
+        $service = $this->service->login($data);
+        if($service['status']){
+            return response(['token' => $service['token']], 200);
         }
 
         return response(['message' => 'Unauthorized'], 401);

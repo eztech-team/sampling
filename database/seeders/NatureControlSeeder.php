@@ -18,38 +18,38 @@ class NatureControlSeeder extends Seeder
         NatureControl::create([
             'name' => 'Manual*** key control performed daily or multiple times per day',
             'size' => 22,
-            'first_error' => 2,
-            'second_error' => 1,
+            'first_error' => true,
+            'second_error' => true,
         ]);
         NatureControl::create([
             'name' => 'Manual key control performed weekly',
             'size' => 5,
-            'first_error' => 1,
-            'second_error' => 0,
+            'first_error' => true,
+            'second_error' => true,
         ]);
         NatureControl::create([
             'name' => 'Manual key control performed monthly',
             'size' => 4,
-            'first_error' => 0,
-            'second_error' => -1,
+            'first_error' => true,
+            'second_error' => false,
         ]);
         NatureControl::create([
             'name' => 'Manual key control performed quarterly',
             'size' => 4,
-            'first_error' => 0,
-            'second_error' => -1,
+            'first_error' => true,
+            'second_error' => false,
         ]);
         NatureControl::create([
             'name' => 'Manual key control performed annually',
             'size' => 0,
-            'first_error' => 1,
-            'second_error' => 0,
+            'first_error' => true,
+            'second_error' => false,
         ]);
         NatureControl::create([
             'name' => 'Automated application control',
             'size' => 12,
-            'first_error' => 0,
-            'second_error' => -1,
+            'first_error' => true,
+            'second_error' => false,
         ]);
         NatureControl::create([
             'name' => 'IT general controls',
