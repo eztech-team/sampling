@@ -40,10 +40,10 @@ Route::controller(VerifyEmailController::class)->group(function (){
     Route::post('resend/email', 'resendEmail');
 });
 
-Route::middleware('auth:sanctum')->group(function(){
+Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
     Route::group(['prefix' => 'companies'], function (){
         Route::controller(CompanyController::class)->group(function (){
-            Route::post('/', 'store');
+            Route::post('/', 'show');
         });
     });
     /* *

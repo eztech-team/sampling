@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignIdFor(Country::class)->constrained();
             $table->foreignIdFor(Role::class)->constrained();
             $table->string('email')->unique();
+            $table->integer('code')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('email_verification_send')->nullable();
             $table->string('password');

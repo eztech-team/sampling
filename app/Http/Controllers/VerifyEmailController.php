@@ -27,7 +27,7 @@ class VerifyEmailController extends Controller
                     ->first()
         ;
 
-        if ($user->code !== (int)$request->code) {
+        if ($user->code != (int)$request->code) {
             return response(['message' => 'Wrong code'], 502);
         }
 

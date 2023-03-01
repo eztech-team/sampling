@@ -19,10 +19,12 @@ class AuthService
         $data['role_id'] = Role::ADMIN;
         $user = User::create($data);
 
-        Company::create([
+        $company = Company::create([
             'user_id' => $user->id,
             'name' => $data['company_name']
         ]);
+
+        $company->user()->attach($user->id);
 
         $this->sendCodeToUserEmail($user);
 
