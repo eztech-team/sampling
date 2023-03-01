@@ -19,12 +19,12 @@ class NatureControlSeeder extends Seeder
             'name' => 'Manual*** key control performed daily or multiple times per day',
             'size' => 22,
             'first_error' => 2,
-            'second_error' => 0,
+            'second_error' => 1,
         ]);
         NatureControl::create([
             'name' => 'Manual key control performed weekly',
             'size' => 5,
-            'first_error' => 2,
+            'first_error' => 1,
             'second_error' => 0,
         ]);
         NatureControl::create([
@@ -42,8 +42,8 @@ class NatureControlSeeder extends Seeder
         NatureControl::create([
             'name' => 'Manual key control performed annually',
             'size' => 0,
-            'first_error' => 0,
-            'second_error' => -1,
+            'first_error' => 1,
+            'second_error' => 0,
         ]);
         NatureControl::create([
             'name' => 'Automated application control',
@@ -58,7 +58,10 @@ class NatureControlSeeder extends Seeder
             'second_error' => 0,
         ]);
         NatureControl::create([
-            'name' => 'The number of occurrences ranges between 50-250 times'
+            'name' => 'The number of occurrences ranges between 50-250 times',
+            'size' => 50,
+            'first_error' => 0,
+            'second_error' => 0,
         ]);
     }
 }

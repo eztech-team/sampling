@@ -40,7 +40,7 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        return response(['token' => $this->service->login($data)], 200);
+        return $this->service->login($data);
     }
 
     public function register(Request $request)
@@ -57,6 +57,7 @@ class AuthController extends Controller
         ]);
 
         $data['role_id'] = Role::COMPANY_ADMIN;
+        $data['password'] = \Hash::make($data['password']);
 
         $user = UserEmailCode::updateOrCreate(
             [

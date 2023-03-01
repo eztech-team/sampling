@@ -31,29 +31,51 @@ class BalanceTestController extends Controller
     public function store(Request $request)
     {
         //Add comments
-        $request->validate([
-            'name' => ['required', 'max:255'],
-            'size' => ['required', 'integer'],
-            'array_table' => ['required'],
-            'aggregate_id' => ['required', 'exists:aggregates,id'],
-            'deviation' => ['required', 'integer'],
-            'effectiveness' => ['required', 'integer'],
-            'nature_control_id' => ['required', 'exists:nature_controls,id'],
-            'balance_item_id' => ['required', 'exists:balance_items,id'],
-        ]);
 
-        BalanceTest::create([
-            'name' => $request->name,
-            'size' => $request->size,
-            'array_table' => $request->array_table,
-            'aggregate_id' => $request->aggregate_id,
-            'deviation' => $request->deviation,
-            'effectiveness' => $request->effectiveness,
-            'nature_control_id' => $request->nature_control_id,
-            'balance_item_id' => $request->balance_item_id
-        ]);
+        if(!$request->balance_id){
+            $request->validate([
+                'balance_id' => 'nullable',
+                'name' => ['required', 'max:255'],
+                'size' => ['required', 'integer'],
+                'array_table' => ['required'],
+                'aggregate_id' => ['required', 'exists:aggregates,id'],
+                'deviation' => ['required', 'integer'],
+                'effectiveness' => ['required', 'integer'],
+                'nature_control_id' => ['required', 'exists:nature_controls,id'],
+                'balance_item_id' => ['required', 'exists:balance_items,id'],
+            ]);
 
-        return response(['message' => 'Success'], 200);
+            $balanceTest = BalanceTest::create([
+                'name' => $request->name,
+                'first_size' => $request->size,
+                'array_table' => $request->array_table,
+                'aggregate_id' => $request->aggregate_id,
+                'deviation' => $request->deviation,
+                'effectiveness' => $request->effectiveness,
+                'nature_control_id' => $request->nature_control_id,
+                'balance_item_id' => $request->balance_item_id
+            ]);
+        }
+
+
+        if($request->balance_id){
+            $request->validate([
+                'size' => ['required', 'integer'],
+            ]);
+            $balanceTest = BalanceTest::find($request->balance_id);
+            $balanceTest->update([
+                'name' => $request->name,
+                'second_size' => $request->size,
+                'array_table' => $request->array_table,
+                'aggregate_id' => $request->aggregate_id,
+                'deviation' => $request->deviation,
+                'effectiveness' => $request->effectiveness,
+                'nature_control_id' => $request->nature_control_id,
+                'balance_item_id' => $request->balance_item_id
+            ]);
+        }
+
+        return response(['message' => 'Success', 'balance_id' => $balanceTest->id], 200);
     }
 
     /**

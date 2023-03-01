@@ -25,7 +25,8 @@ return new class extends Migration
             $table->json('array_table');
             $table->integer('effectiveness');
             $table->integer('deviation');
-            $table->integer('size');
+            $table->integer('first_size');
+            $table->integer('second_size')->nullable();
             $table->boolean('method')->default(0);
             $table->integer('status')->default(2);
             $table->softDeletes();

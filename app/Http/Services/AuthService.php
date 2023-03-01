@@ -44,7 +44,7 @@ class AuthService
             return response(['message' => 'Unauthorized'], 401);
         }
 
-        return request()->user()->createToken(\Str::random(10))->plainTextToken;
+        return response(['token' => request()->user()->createToken(\Str::random(10))->plainTextToken], 200);
     }
 
     public function sendCodeToEmail($request)
