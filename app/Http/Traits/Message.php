@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Mail;
 
 trait Message
 {
-    public function sendCodeToUserEmail($user)
+    public function sendCodeToUserEmail($user): void
     {
         // $code = $this->generateFourDigitCode();
         $code = 1111;
@@ -22,11 +22,7 @@ trait Message
 //            ;
 
             $user->update(['email_verification_send' => Carbon::now()]);
-
-            return ['message' => 'Success', 'email' => $user->email, 'status' => 200];
         }
-
-        return ['message' => 'We cannot send message', 'status' => 550];
     }
 
     public function generateFourDigitCode()

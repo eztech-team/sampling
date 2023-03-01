@@ -28,7 +28,7 @@ class AuthController extends Controller
             'conf_password' => ['required', 'same:password']
         ]);
 
-        return response($this->service->register($data), 200);
+        return response(['email' => $this->service->register($data)], 200);
     }
 
     public function login(Request $request)

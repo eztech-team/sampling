@@ -24,7 +24,9 @@ class AuthService
             'name' => $data['company_name']
         ]);
 
-        return $this->sendCodeToUserEmail($user);
+        $this->sendCodeToUserEmail($user);
+
+        return $user->email;
     }
 
     public function login($data): String
