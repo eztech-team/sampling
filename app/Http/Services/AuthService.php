@@ -31,7 +31,7 @@ class AuthService
             'name' => $data->company_name
         ]);
 
-        $company->user()->attach($user->id);
+        $company->users()->attach($user->id);
 
         return $user;
     }
