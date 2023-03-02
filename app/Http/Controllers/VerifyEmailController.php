@@ -22,14 +22,14 @@ class VerifyEmailController extends Controller
     {
         $request->validate([
             'code'         => ['required', 'regex:/^\d{4}$/'],
-            'email'        => ['email', 'required'],
+            'email'        => ['email', 'required', 'exists:user_email_codes'],
         ]);
 
         $user = UserEmailCode::where('email', $request->email)
                     ->first()
         ;
 
-        if ($user->code != (int)$request->code) {
+        if ($user->code != (int)$request->code or !$user->code) {
             return response(['message' => 'Wrong code'], 502);
         }
 
