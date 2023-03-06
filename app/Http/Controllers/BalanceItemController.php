@@ -18,7 +18,9 @@ class BalanceItemController extends Controller
         request()->validate([
             'project_id' => ['required', 'exists:projects,id']
         ]);
-        $tests = BalanceItem::where('project_id', request()->project_id)->get();
+        $tests = BalanceItem::where('project_id', request()->project_id)
+            ->withCount('balanceTests')
+            ->get();
 
         return response($tests, 200);
     }
