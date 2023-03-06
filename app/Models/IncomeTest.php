@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class BalanceTest extends Model
+class IncomeTest extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -17,9 +17,9 @@ class BalanceTest extends Model
         'array_table' => 'array'
     ];
 
-    public function balanceItem()
+    public function incomeItem()
     {
-        return $this->belongsTo(BalanceItem::class);
+        return $this->belongsTo(IncomeItem::class);
     }
 
     public function natureControl()
@@ -34,7 +34,7 @@ class BalanceTest extends Model
 
     public function excel()
     {
-        return $this->hasMany(BalanceTestExcel::class);
+        return $this->hasMany(IncomeTestExcel::class);
     }
 
     protected function data() : Attribute

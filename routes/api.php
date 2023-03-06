@@ -114,7 +114,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
         Route::controller(BalanceTestController::class)->group(function (){
             Route::get('/{project_id}', 'index');
             Route::post('/', 'store');
-            Route::get('/{balanceTest}', 'show');
+            Route::get('/show/{balanceTest}', 'show');
         });
     });
     /*

@@ -6,25 +6,15 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BalanceItem extends Model
+class BalanceTestExcel extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'description',
-        'array_table',
-        'project_id'
-    ];
+    protected $guarded = [];
 
     protected $casts = [
-        'array_table' => 'array',
+        'data' => 'array'
     ];
-
-    public function tests()
-    {
-        return $this->hasMany(BalanceTest::class);
-    }
 
     protected function data() : Attribute
     {

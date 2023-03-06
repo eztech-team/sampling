@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\ExcelImport;
+use App\Http\Traits\CreateDeleteFiles;
+use App\Models\Aggregate;
 use App\Models\BalanceItem;
 use App\Models\BalanceTest;
+use App\Models\BalanceTestExcel;
 use App\Rules\NatureControlRule;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BalanceTestController extends Controller
 {
+    use CreateDeleteFiles;
+
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +24,7 @@ class BalanceTestController extends Controller
     public function index()
     {
         $balanceItem = BalanceItem::where('project_id', request()->project_id)
-            ->with('balanceTests')
+            ->with('tests')
             ->get();
 
         return response($balanceItem, 200);
@@ -57,6 +64,11 @@ class BalanceTestController extends Controller
                 'balance_item_id' => $request->balance_item_id
             ]);
 
+            $aggregate = Aggregate::find($request->aggregate_id);
+
+            //        $pathToCsv = $this->storeFile('excel', 'excels', $request);
+
+            Excel::import(new ExcelImport($request->size, [], $balanceTest->id, $aggregate->amount_column), 'excels/bZsiNCQyu1iL9yu5a4KyfYZcf4SpYcmdG2Y3tThz.xls');
             //check logic
             /*
              * if check logics error 0 status = 1
@@ -72,6 +84,11 @@ class BalanceTestController extends Controller
                     'exists:nature_controls,id',
                     new NatureControlRule($balanceTest->nature_control_id, $balanceTest->id)]
             ]);
+
+            $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
+            $ignore = array_column($balanceTestExcel, 'row');
+
+            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $balanceTest->aggregate_id), 'excels/bZsiNCQyu1iL9yu5a4KyfYZcf4SpYcmdG2Y3tThz.xls');
 
             $balanceTest->update([
                 'second_size' => $request->size,
@@ -90,7 +107,8 @@ class BalanceTestController extends Controller
     public function show(BalanceTest $balanceTest)
     {
         //Add comments
-        $balanceTest->load(['balanceItem:id,name', 'aggregate:id,name', 'natureControl:id,name']);
+
+        $balanceTest->load(['excel']);
         return response($balanceTest, 200);
     }
 

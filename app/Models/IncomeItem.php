@@ -21,6 +21,11 @@ class IncomeItem extends Model
         'array_table' => 'array',
     ];
 
+    public function tests()
+    {
+        return $this->hasMany(IncomeTest::class);
+    }
+
     protected function data() : Attribute
     {
         return Attribute::make(

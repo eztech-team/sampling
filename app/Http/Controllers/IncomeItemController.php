@@ -17,7 +17,9 @@ class IncomeItemController extends Controller
         request()->validate([
             'project_id' => ['required', 'exists:projects,id']
         ]);
-        $tests = IncomeItem::where('project_id', request()->project_id)->get();
+        $tests = IncomeItem::where('project_id', request()->project_id)
+            ->withCount('tests')
+            ->get();
 
         return response($tests, 200);
     }
@@ -62,14 +64,18 @@ class IncomeItemController extends Controller
      */
     public function update(Request $request, IncomeItem $incomeItem)
     {
-        $data = $request->validate([
+        $request->validate([
             'name' => ['required', 'max:255'],
             'description' => ['nullable', 'max:255'],
             'array_table' => ['required', 'between:6,6', 'array'],
             'project_id' => ['required', 'exists:projects,id'],
         ]);
 
-        $incomeItem->update($data);
+        $incomeItem->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'array_table' => $request->array_table,
+        ]);
 
         return response(['message' => 'Success'], 200);
     }
