@@ -7,9 +7,9 @@ use App\Http\Controllers\BalanceTestController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\IncomeItemController;
+use App\Http\Controllers\IncomeTestController;
 use App\Http\Controllers\NatureControlController;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\TestController;
 use App\Http\Controllers\VerifyEmailController;
 use App\Models\Company;
 use Illuminate\Http\Request;
@@ -108,13 +108,25 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
         });
     });
     /*
-     * TOC”s
+     * TOC”s Балансовые статьи
      * */
-    Route::group(['prefix' => 'toc-s'], function (){
+    Route::group(['prefix' => 'balance-test'], function (){
         Route::controller(BalanceTestController::class)->group(function (){
             Route::get('/{project_id}', 'index');
             Route::post('/', 'store');
             Route::get('/show/{balanceTest}', 'show');
+            Route::delete('/{balanceTest}', 'destroy');
+        });
+    });
+    /*
+     * TOC”s Статья отчета о прибылях и убытках
+     * */
+    Route::group(['prefix' => 'income-test'], function (){
+        Route::controller(IncomeTestController::class)->group(function (){
+            Route::get('/{project_id}', 'index');
+            Route::post('/', 'store');
+            Route::get('/show/{incomeTest}', 'show');
+            Route::delete('/{incomeTest}', 'destroy');
         });
     });
     /*

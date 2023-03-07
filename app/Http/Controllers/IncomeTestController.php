@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Imports\ExcelImport;
 use App\Http\Traits\CreateDeleteFiles;
 use App\Models\Aggregate;
-use App\Models\BalanceItem;
-use App\Models\BalanceTest;
-use App\Models\BalanceTestExcel;
+use App\Models\IncomeItem;
+use App\Models\IncomeTest;
+use App\Models\IncomeTestExcel;
 use App\Rules\NatureControlRule;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
-class BalanceTestController extends Controller
+class IncomeTestController extends Controller
 {
     use CreateDeleteFiles;
 
@@ -23,7 +23,7 @@ class BalanceTestController extends Controller
      */
     public function index()
     {
-        $balanceItem = BalanceItem::where('project_id', request()->project_id)
+        $balanceItem = IncomeItem::where('project_id', request()->project_id)
             ->with('tests')
             ->get();
 
@@ -40,9 +40,9 @@ class BalanceTestController extends Controller
     {
         //Add comments
 
-        if(!$request->balance_id){
+        if(!$request->income_id){
             $request->validate([
-                'balance_id' => 'nullable',
+                'income_id' => 'nullable',
                 'name' => ['required', 'max:255'],
                 'size' => ['required', 'integer'],
                 'array_table' => ['required'],
@@ -53,7 +53,7 @@ class BalanceTestController extends Controller
                 'balance_item_id' => ['required', 'exists:balance_items,id'],
             ]);
 
-            $balanceTest = BalanceTest::create([
+            $incomeTest = IncomeTest::create([
                 'name' => $request->name,
                 'first_size' => $request->size,
                 'array_table' => $request->array_table,
@@ -68,29 +68,35 @@ class BalanceTestController extends Controller
 
             //        $pathToCsv = $this->storeFile('excel', 'excels', $request);
 
-            Excel::import(new ExcelImport($request->size, [], $balanceTest->id, $aggregate->amount_column), $aggregate->path);
+            Excel::import(new ExcelImport($request->size, [], $incomeTest->id, $aggregate->amount_column), $aggregate->path);
+            //check logic
+            /*
+             * if check logics error 0 status = 1
+             * else status = 0
+             * */
         }
 
-        if($request->balance_id){
-            $balanceTest = BalanceTest::find($request->balance_id);
+        if($request->income_id){
+            $incomeTest = IncomeTest::find($request->balance_id);
             $request->validate([
                 'size' => ['required', 'integer'],
                 'nature_control_id' => [
                     'exists:nature_controls,id',
-                    new NatureControlRule($balanceTest->nature_control_id, $balanceTest->id)]
+                    new NatureControlRule($incomeTest->nature_control_id, $incomeTest->id)]
             ]);
 
-            $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
+            $balanceTestExcel = IncomeTestExcel::where('income_test_id', $incomeTest->id)->first()->data;
+
             $ignore = array_column($balanceTestExcel, 'row');
 
-            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $balanceTest->aggregate_id), 'excels/bZsiNCQyu1iL9yu5a4KyfYZcf4SpYcmdG2Y3tThz.xls');
+            Excel::import(new ExcelImport($request->size, $ignore, $incomeTest->id, $incomeTest->aggregate_id), 'excels/bZsiNCQyu1iL9yu5a4KyfYZcf4SpYcmdG2Y3tThz.xls');
 
-            $balanceTest->update([
+            $incomeTest->update([
                 'second_size' => $request->size,
             ]);
         }
 
-        return response(['message' => 'Success', 'balance_id' => $balanceTest->id], 200);
+        return response(['message' => 'Success', 'income_id' => $incomeTest->id], 200);
     }
 
     /**
@@ -99,12 +105,12 @@ class BalanceTestController extends Controller
      * @param  \App\Models\BalanceTest  $balanceTest
      * @return \Illuminate\Http\Response
      */
-    public function show(BalanceTest $balanceTest)
+    public function show(IncomeTest $incomeTest)
     {
         //Add comments
 
-        $balanceTest->load(['excel']);
-        return response($balanceTest, 200);
+        $incomeTest->load(['excel']);
+        return response($incomeTest, 200);
     }
 
     /**
@@ -113,9 +119,9 @@ class BalanceTestController extends Controller
      * @param  \App\Models\BalanceTest  $balanceTest
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BalanceTest $balanceTest)
+    public function destroy(IncomeTest $incomeTest)
     {
-        $balanceTest->forceDelete();
+        $incomeTest->forceDelete();
 
         return response(['message' => 'Success'], 200);
     }

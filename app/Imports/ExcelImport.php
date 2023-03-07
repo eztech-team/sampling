@@ -39,7 +39,6 @@ class ExcelImport implements ToCollection
             $item = $item->toArray();
             $arr[] = [
                 'row' => $item['row'],
-                'sum' => $item[10]
             ];
         }
 
