@@ -64,11 +64,9 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/', 'index');
             Route::post( '/', 'store');
             Route::get('/{project}', 'show');
-
             Route::put( '/{project}', 'update');
             Route::put( '/edit/level/{project}', 'updateLevel');
             Route::delete('{project}', 'destroy');
-            Route::put( '/edit/level/{project}', 'updateLevel');
         });
     });
     /* *
@@ -79,9 +77,8 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/', 'index');
             Route::post( '/', 'store');
             Route::get('/{balanceItem}', 'show');
-
             Route::put( '/{balanceItem}', 'update')->middleware('check.project');
-            Route::delete('{balanceItem}', 'destroy')->middleware('check.project');;
+            Route::delete('/{balanceItem}', 'destroy')->middleware('check.project');;
         });
     });
     /* *
@@ -101,7 +98,6 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/', 'index');
             Route::post( '/', 'store');
             Route::get('/{incomeItem}', 'show');
-
             Route::put( '/{incomeItem}', 'update')->middleware('check.project');
             Route::delete('/{incomeItem}', 'destroy')->middleware('check.project');;
         });

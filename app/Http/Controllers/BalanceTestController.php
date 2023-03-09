@@ -83,6 +83,8 @@ class BalanceTestController extends Controller
                     'exists:nature_controls,id',
                     new NatureControlRule($balanceTest->nature_control_id, $balanceTest->id)]
             ]);
+            $balanceTest->second_size = $request->size;
+            $balanceTest->save();
 
             $aggregate = Aggregate::find($request->aggregate_id);
             $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
@@ -113,8 +115,17 @@ class BalanceTestController extends Controller
     {
         //Add comments
 
-        $balanceTest->load(['excel']);
-        return response($balanceTest, 200);
+        $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)
+            ->select('id as balance_test_excel_id')
+            ->get();
+
+        return response(
+            [
+                'excels' => $balanceTestExcel,
+                'first_size' => $balanceTest->first_size,
+                'second_size' => $balanceTest->second_size
+            ],
+            200);
     }
 
     /**
