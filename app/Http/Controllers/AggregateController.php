@@ -25,7 +25,7 @@ class AggregateController extends Controller
         $request->validate([
             'excel' => ['required', 'mimes:xls'],
             'name' => ['required', 'max:255', 'unique:aggregates'],
-            'amount_column' => ['required', 'integer'],
+            'amount_column' => ['nullable', 'integer'],
             'title' => ['required', 'boolean'],
             'project_id' => ['required', 'exists:projects,id']
         ]);

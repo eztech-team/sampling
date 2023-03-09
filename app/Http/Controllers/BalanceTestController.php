@@ -51,6 +51,7 @@ class BalanceTestController extends Controller
                 'effectiveness' => ['required', 'integer'],
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'balance_item_id' => ['required', 'exists:balance_items,id'],
+                'type' => ['required', 'boolean']
             ]);
 
             $balanceTest = BalanceTest::create([
@@ -65,10 +66,12 @@ class BalanceTestController extends Controller
             ]);
 
             $aggregate = Aggregate::find($request->aggregate_id);
+            $ignore = [];
+            if($aggregate->title){
+                $ignore = [1];
+            }
 
-            //        $pathToCsv = $this->storeFile('excel', 'excels', $request);
-
-            Excel::import(new ExcelImport($request->size, [], $balanceTest->id, $aggregate->amount_column), $aggregate->path);
+            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $request->type), $aggregate->path);
         }
 
         if($request->balance_id){
@@ -80,10 +83,16 @@ class BalanceTestController extends Controller
                     new NatureControlRule($balanceTest->nature_control_id, $balanceTest->id)]
             ]);
 
+            $aggregate = Aggregate::find($request->aggregate_id);
             $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
+
+            if ($aggregate->title){
+                $balanceTestExcel[] = ["row" => 1];
+            }
+
             $ignore = array_column($balanceTestExcel, 'row');
 
-            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $balanceTest->aggregate_id), 'excels/bZsiNCQyu1iL9yu5a4KyfYZcf4SpYcmdG2Y3tThz.xls');
+            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id), $aggregate->path);
 
             $balanceTest->update([
                 'second_size' => $request->size,

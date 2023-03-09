@@ -12,14 +12,14 @@ class ExcelImport implements ToCollection
     private $balanceTestId;
     private $ignore;
     private $random;
-    private $sum;
+    private $type;
 
-    public function __construct($random, $ignore, $balanceTestId, $sum)
+    public function __construct($random, $ignore, $balanceTestId, $type)
     {
         $this->random = $random;
         $this->ignore = $ignore;
         $this->balanceTestId = $balanceTestId;
-        $this->sum = $sum;
+        $this->type = $type;
     }
 
     public function collection(Collection $collection)
@@ -34,12 +34,27 @@ class ExcelImport implements ToCollection
             $items->push($value);
         }
 
-        $items = $items->whereNotIn('row', $this->ignore)->random($this->random);
-        foreach ($items as $item){
-            $item = $item->toArray();
+        if($this->type){
+            $items = $items->whereNotIn('row', $this->ignore)->random($this->random);
+            foreach ($items as $item){
+                $item = $item->toArray();
+                $arr[] = [
+                    'row' => $item['row'],
+                ];
+            }
+        }else{
+            $randomItem = $items->whereNotIn('row', $this->ignore)->random();
+
             $arr[] = [
-                'row' => $item['row'],
+                'row' => $randomItem->toArray()['row'],
             ];
+            $item = 2700 / $this->random;
+            for($i = 0; $i < $this->random; $i++){
+
+                $arr[] = [
+                    'row' => 1
+                ];
+            }
         }
 
         $balanceTestExcel = BalanceTestExcel::where('balance_test_id', '=' ,$this->balanceTestId)->get();

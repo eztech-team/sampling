@@ -30,7 +30,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('excel', [ExcelController::class, 'store']);
 Route::post('company/accept', function (){
     $companyID = request()->company_id;
     $company = Company::find($companyID);
@@ -118,6 +117,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::delete('/{balanceTest}', 'destroy');
         });
     });
+    Route::post('balance-test/excel/download', [ExcelController::class, 'download']);
     /*
      * TOC”s Статья отчета о прибылях и убытках
      * */
