@@ -40,7 +40,7 @@ class BalanceTestController extends Controller
     {
         //Add comments
 
-        if(!$request->balance_id){
+        if(!$request->balance_test_id){
             $request->validate([
                 'balance_id' => 'nullable',
                 'name' => ['required', 'max:255'],
@@ -51,7 +51,7 @@ class BalanceTestController extends Controller
                 'effectiveness' => ['required', 'integer'],
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'balance_item_id' => ['required', 'exists:balance_items,id'],
-                'type' => ['required', 'boolean']
+                'method' => ['required', 'boolean']
             ]);
 
             $balanceTest = BalanceTest::create([
@@ -62,7 +62,8 @@ class BalanceTestController extends Controller
                 'deviation' => $request->deviation,
                 'effectiveness' => $request->effectiveness,
                 'nature_control_id' => $request->nature_control_id,
-                'balance_item_id' => $request->balance_item_id
+                'balance_item_id' => $request->balance_item_id,
+                'method' => $request->method,
             ]);
 
             $aggregate = Aggregate::find($request->aggregate_id);
@@ -71,11 +72,11 @@ class BalanceTestController extends Controller
                 $ignore = [1];
             }
 
-            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $request->type), $aggregate->path);
+            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $request->method), $aggregate->path);
         }
 
-        if($request->balance_id){
-            $balanceTest = BalanceTest::find($request->balance_id);
+        if($request->balance_test_id){
+            $balanceTest = BalanceTest::find($request->balance_test_id);
             $request->validate([
                 'size' => ['required', 'integer'],
                 'nature_control_id' => [
@@ -92,14 +93,14 @@ class BalanceTestController extends Controller
 
             $ignore = array_column($balanceTestExcel, 'row');
 
-            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id), $aggregate->path);
+            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $request->method), $aggregate->path);
 
             $balanceTest->update([
                 'second_size' => $request->size,
             ]);
         }
 
-        return response(['message' => 'Success', 'balance_id' => $balanceTest->id], 200);
+        return response(['message' => 'Success', 'balance_test_id' => $balanceTest->id], 200);
     }
 
     /**
