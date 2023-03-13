@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->date('start_period');
-            $table->date('end_period');
+            $table->timestamp('start_period');
+            $table->timestamp('end_period');
             $table->boolean('supervisor_conf')->default(false); // Подтверждение руководителем
             $table->boolean('audit_conf')->default(false); // Является ли аудит промежуточным
             $table->integer('general_level')->nullable();
