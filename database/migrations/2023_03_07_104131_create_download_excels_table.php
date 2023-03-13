@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('download_excels', function (Blueprint $table) {
             $table->id();
-            $table->integer('balance_test_id')->nullable();
-            $table->integer('income_test_id')->nullable();
+            $table->integer('balance_test_excel_id')->nullable();
+            $table->integer('income_test_excel_id')->nullable();
             $table->string('path');
             $table->timestamps();
         });
