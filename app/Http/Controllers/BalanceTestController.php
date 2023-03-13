@@ -42,7 +42,7 @@ class BalanceTestController extends Controller
 
         if(!$request->balance_test_id){
             $request->validate([
-                'balance_id' => 'nullable',
+                'balance_test_id' => 'nullable',
                 'name' => ['required', 'max:255'],
                 'size' => ['required', 'integer'],
                 'array_table' => ['required'],
@@ -72,7 +72,7 @@ class BalanceTestController extends Controller
                 $ignore = [1];
             }
 
-            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $request->method), $aggregate->path);
+            Excel::import(new ExcelImport(random: $request->size, ignore: $ignore, method: $request->method, balanceTestId: $balanceTest->id), $aggregate->path);
         }
 
         if($request->balance_test_id){
@@ -83,8 +83,6 @@ class BalanceTestController extends Controller
                     'exists:nature_controls,id',
                     new NatureControlRule($balanceTest->nature_control_id, $balanceTest->id)]
             ]);
-            $balanceTest->second_size = $request->size;
-            $balanceTest->save();
 
             $aggregate = Aggregate::find($request->aggregate_id);
             $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
@@ -95,7 +93,7 @@ class BalanceTestController extends Controller
 
             $ignore = array_column($balanceTestExcel, 'row');
 
-            Excel::import(new ExcelImport($request->size, $ignore, $balanceTest->id, $request->method), $aggregate->path);
+            Excel::import(new ExcelImport(random: $request->size, ignore: $ignore, method: $balanceTest->method, balanceTestId: $balanceTest->id), $aggregate->path);
 
             $balanceTest->update([
                 'second_size' => $request->size,
@@ -115,17 +113,9 @@ class BalanceTestController extends Controller
     {
         //Add comments
 
-        $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)
-            ->select('id as balance_test_excel_id')
-            ->get();
+        $balanceTest = $balanceTest->load(['aggregate', 'natureControl']);
 
-        return response(
-            [
-                'excels' => $balanceTestExcel,
-                'first_size' => $balanceTest->first_size,
-                'second_size' => $balanceTest->second_size
-            ],
-            200);
+        return response($balanceTest,200);
     }
 
     /**
@@ -139,5 +129,20 @@ class BalanceTestController extends Controller
         $balanceTest->forceDelete();
 
         return response(['message' => 'Success'], 200);
+    }
+
+    public function excel(BalanceTest $balanceTest)
+    {
+        $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)
+            ->select('id as balance_test_excel_id')
+            ->get();
+
+        return response(
+            [
+                'excels' => $balanceTestExcel,
+                'first_size' => $balanceTest->first_size,
+                'second_size' => $balanceTest->second_size
+            ],
+            200);
     }
 }

@@ -111,9 +111,13 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::post('/', 'store');
             Route::get('/show/{balanceTest}', 'show');
             Route::delete('/{balanceTest}', 'destroy');
+            Route::get('/show/excel/{balanceTest}', 'excel');
         });
     });
-    Route::post('balance-test/excel/download', [ExcelController::class, 'download']);
+
+    Route::post('balance-test/excel/download', [ExcelController::class, 'downloadBalance']);
+    Route::post('income-test/excel/download', [ExcelController::class, 'downloadIncome']);
+
     /*
      * TOC”s Статья отчета о прибылях и убытках
      * */
@@ -123,6 +127,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::post('/', 'store');
             Route::get('/show/{incomeTest}', 'show');
             Route::delete('/{incomeTest}', 'destroy');
+            Route::get('/show/excel/{incomeTest}', 'excel');
         });
     });
     /*
