@@ -81,7 +81,7 @@ class BalanceTestController extends Controller
                 'size' => ['required', 'integer'],
                 'nature_control_id' => [
                     'exists:nature_controls,id',
-                    new NatureControlRule($balanceTest->nature_control_id, $balanceTest->id)]
+                    new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)]
             ]);
 
             $aggregate = Aggregate::find($request->aggregate_id);

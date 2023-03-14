@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Models\BalanceTest;
+use App\Models\IncomeTest;
 use App\Models\NatureControl;
 use Illuminate\Contracts\Validation\Rule;
 
@@ -11,15 +12,17 @@ class NatureControlRule implements Rule
 
     protected $natureControlID;
     protected $balanceID;
+    protected $incomeID;
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct($natureControlID, $balanceID)
+    public function __construct($natureControlID, $balanceID = null, $incomeID = null)
     {
         $this->natureControlID = $natureControlID;
         $this->balanceID = $balanceID;
+        $this->incomeID = $incomeID;
     }
 
     /**
@@ -32,9 +35,10 @@ class NatureControlRule implements Rule
     public function passes($attribute, $value)
     {
         $nature = NatureControl::find($this->natureControlID);
-        $balanceTest = BalanceTest::find($this->balanceID);
+        if($this->balanceID) $test = BalanceTest::find($this->balanceID);
+        if($this->incomeID) $test = IncomeTest::find($this->incomeID);
 
-        return $nature->second_error == 1 && $balanceTest->second_size == null or $balanceTest->second_size == 0;
+        return $nature->first_error == 0 or (($nature->first_error > $test->first_error) && $test->second_size == null) or $test->second_size == 0;
     }
 
     /**

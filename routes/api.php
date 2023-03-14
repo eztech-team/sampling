@@ -10,6 +10,8 @@ use App\Http\Controllers\IncomeItemController;
 use App\Http\Controllers\IncomeTestController;
 use App\Http\Controllers\NatureControlController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ResultTocController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
 use App\Models\Company;
 use Illuminate\Http\Request;
@@ -130,6 +132,17 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/show/excel/{incomeTest}', 'excel');
         });
     });
+    /*
+     * Результаты toc”s
+     * */
+    Route::group(['prefix' => 'tocs-result'], function (){
+       Route::controller(ResultTocController::class)->group(function (){
+           Route::get('/errors', 'errors');
+           Route::post('/balance-error', 'balanceError');
+          Route::post('/income-error', 'incomeError');
+       });
+    });
+
     /*
      * Nature of control and frequency of performance
      * */

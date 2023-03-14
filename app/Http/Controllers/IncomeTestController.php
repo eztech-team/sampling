@@ -72,7 +72,7 @@ class IncomeTestController extends Controller
                 'size' => ['required', 'integer'],
                 'nature_control_id' => [
                     'exists:nature_controls,id',
-                    new NatureControlRule($incomeTest->nature_control_id, $incomeTest->id)]
+                    new NatureControlRule(natureControlID: $incomeTest->nature_control_id, incomeID: $incomeTest->id)]
             ]);
 
             $aggregate = Aggregate::find($incomeTest->aggregate_id);
@@ -117,8 +117,6 @@ class IncomeTestController extends Controller
 
     public function excel(IncomeTest $incomeTest)
     {
-        //Add comments
-
         $incomeTestExcel = IncomeTestExcel::where('income_test_id', $incomeTest->id)
             ->select('id as income_test_excel_id')
             ->get();
