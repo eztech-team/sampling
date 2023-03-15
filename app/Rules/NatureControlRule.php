@@ -35,8 +35,12 @@ class NatureControlRule implements Rule
     public function passes($attribute, $value)
     {
         $nature = NatureControl::find($this->natureControlID);
-        if($this->balanceID) $test = BalanceTest::find($this->balanceID);
-        if($this->incomeID) $test = IncomeTest::find($this->incomeID);
+        if($this->balanceID) {
+            $test = BalanceTest::find($this->balanceID);
+        }
+        if($this->incomeID) {
+            $test = IncomeTest::find($this->incomeID);
+        }
 
         return $nature->first_error == 0 or (($nature->first_error > $test->first_error) && $test->second_size == null);
     }
