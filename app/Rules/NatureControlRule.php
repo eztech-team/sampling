@@ -38,7 +38,7 @@ class NatureControlRule implements Rule
         if($this->balanceID) $test = BalanceTest::find($this->balanceID);
         if($this->incomeID) $test = IncomeTest::find($this->incomeID);
 
-        return $nature->first_error == 0 or (($nature->first_error > $test->first_error) && $test->second_size == null) or $test->second_size == 0;
+        return $nature->first_error == 0 or (($nature->first_error > $test->first_error) && $test->second_size == null);
     }
 
     /**
