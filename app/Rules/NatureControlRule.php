@@ -42,7 +42,7 @@ class NatureControlRule implements Rule
             $test = IncomeTest::find($this->incomeID);
         }
 
-        return $nature->first_error == 0 or (($nature->first_error > $test->first_error) && $test->second_size == null);
+        return $nature->first_error == 0 or (($nature->first_error > $test->first_error) && $test->second_error == null);
     }
 
     /**
