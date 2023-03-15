@@ -29,7 +29,7 @@ class ResultTocController extends Controller
     public function balanceError(Request $request)
     {
         $request->validate([
-            'first_error' => ['nullable'],
+            'first_error' => ['required_if:second_error,=,null'],
             'second_error' => ['required_if:first_error,=,null'],
             'balance_test_id' => ['required'],
             'nature_control_id' => [

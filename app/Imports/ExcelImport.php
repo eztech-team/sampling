@@ -83,7 +83,11 @@ class ExcelImport implements ToCollection
 
         $sum = (int)($row / $this->random);
 
-        for($i = 0; $i < $this->random; $i++){
+        $this->arr[] = [
+            'row' => $counter
+        ];
+
+        for($i = 1; $i < $this->random; $i++){
             if($counter + $sum > $row){
                 $counter = $counter + $sum - $row;
             }else{
