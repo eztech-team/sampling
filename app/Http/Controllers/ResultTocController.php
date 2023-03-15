@@ -31,14 +31,14 @@ class ResultTocController extends Controller
         $request->validate([
             'first_error' => ['required_if:second_error,=,null'],
             'second_error' => ['required_if:first_error,=,null'],
-            'balance_test_id' => ['required'],
+            'balance_test_id' => ['required', 'exists:balance_tests,id'],
             'nature_control_id' => [
                 'exists:nature_controls,id',
                 new NatureControlRule(natureControlID: $request->nature_control_id, balanceID: $request->balance_test_id)]
         ]);
 
         $balanceTest = BalanceTest::where('id', $request->balance_test_id)->first();
-        if ($request->first_error){
+        if ($request->first_error != null){
             $balanceTest->update([
                 'first_error' => $request->first_error
             ]);
@@ -63,7 +63,7 @@ class ResultTocController extends Controller
             ]);
 
             $incomeTest = IncomeTest::where('id', $request->income_test_id)->first();
-            if ($request->first_error){
+            if ($request->first_error != null){
                 $incomeTest->update([
                     'first_error' => $request->first_error
                 ]);
