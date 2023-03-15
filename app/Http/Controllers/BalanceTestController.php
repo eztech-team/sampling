@@ -84,7 +84,7 @@ class BalanceTestController extends Controller
                     new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)]
             ]);
 
-            $aggregate = Aggregate::find($request->aggregate_id);
+            $aggregate = Aggregate::find($balanceTest->aggregate_id);
             $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
 
             if ($aggregate->title){
@@ -93,7 +93,12 @@ class BalanceTestController extends Controller
 
             $ignore = array_column($balanceTestExcel, 'row');
 
-            Excel::import(new ExcelImport(random: $request->size, ignore: $ignore, method: $balanceTest->method, balanceTestId: $balanceTest->id), $aggregate->path);
+            Excel::import(
+                new ExcelImport(
+                    random: $request->size,
+                    ignore: $ignore,
+                    method: $balanceTest->method,
+                    balanceTestId: $balanceTest->id), $aggregate->path);
 
             $balanceTest->update([
                 'second_size' => $request->size,
