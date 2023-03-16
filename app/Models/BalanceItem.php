@@ -23,7 +23,9 @@ class BalanceItem extends Model
 
     public function tests()
     {
-        return $this->hasMany(BalanceTest::class)->where('deleted_at', null);
+        return $this->hasMany(BalanceTest::class)
+            ->where('deleted_at', null)
+            ->orderBy('id', 'asc');
     }
 
     protected function data() : Attribute
