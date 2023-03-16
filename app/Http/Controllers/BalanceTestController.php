@@ -51,7 +51,8 @@ class BalanceTestController extends Controller
                 'effectiveness' => ['required', 'string'],
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'balance_item_id' => ['required', 'exists:balance_items,id'],
-                'method' => ['required', 'boolean']
+                'method' => ['required', 'boolean'],
+                'comment' => ['nullable', 'max:255']
             ]);
 
             $balanceTest = BalanceTest::create([
@@ -64,6 +65,7 @@ class BalanceTestController extends Controller
                 'nature_control_id' => $request->nature_control_id,
                 'balance_item_id' => $request->balance_item_id,
                 'method' => $request->method,
+                'comment' => $request->comment
             ]);
 
             if($balanceTest->first_size){
@@ -127,8 +129,20 @@ class BalanceTestController extends Controller
     public function show(BalanceTest $balanceTest)
     {
         //Add comments
-
-        $balanceTest = $balanceTest->load(['aggregate', 'natureControl']);
+        $balanceTest = BalanceTest::where('id', $balanceTest->id)
+            ->select('id',
+                'name',
+                'nature_control_id',
+                'first_size as size',
+                'array_table',
+                'aggregate_id',
+                'effectiveness',
+                'deviation',
+                'balance_item_id',
+                'method',
+                'comment',
+            )
+            ->with(['aggregate', 'natureControl'])->first();
 
         return response($balanceTest,200);
     }

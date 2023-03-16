@@ -14,12 +14,27 @@ class ResultTocController extends Controller
         $error = null;
         if($request->balance_test_id){
             $error = BalanceTest::where('id', $request->balance_test_id)
-                ->select('id', 'first_error', 'first_size', 'second_error', 'second_size', 'nature_control_id')
+                ->select('id',
+                    'first_error',
+                    'first_size',
+                    'second_error',
+                    'second_size',
+                    'nature_control_id',
+                    'comment'
+                )
                 ->first();
         }
         if($request->income_test_id){
             $error = IncomeTest::where('id', $request->income_test_id)
-                ->select('id', 'first_error', 'first_size', 'second_error', 'second_size', 'nature_control_id')
+                ->select(
+                    'id',
+                    'first_error',
+                    'first_size',
+                    'second_error',
+                    'second_size',
+                    'nature_control_id',
+                    'comment'
+                )
                 ->first();
         }
 

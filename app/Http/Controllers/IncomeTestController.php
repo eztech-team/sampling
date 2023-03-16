@@ -41,6 +41,7 @@ class IncomeTestController extends Controller
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'income_item_id' => ['required', 'exists:income_items,id'],
                 'method' => ['required', 'boolean'],
+                'comment' => ['nullable', 'max:255'],
             ]);
 
             $incomeTest = IncomeTest::create([
@@ -53,6 +54,7 @@ class IncomeTestController extends Controller
                 'nature_control_id' => $request->nature_control_id,
                 'income_item_id' => $request->income_item_id,
                 'method' => $request->method,
+                'comment' => $request->comment
             ]);
 
             if($incomeTest->first_size){
@@ -112,7 +114,20 @@ class IncomeTestController extends Controller
     {
         //Add comments
 
-        $incomeTest = $incomeTest->load(['aggregate', 'natureControl']);
+        $incomeTest = IncomeTest::where('id', $incomeTest->id)
+            ->select('id',
+                'name',
+                'nature_control_id',
+                'first_size as size',
+                'array_table',
+                'aggregate_id',
+                'effectiveness',
+                'deviation',
+                'income_item_id',
+                'method',
+                'comment',
+            )
+            ->with(['aggregate', 'natureControl'])->first();
 
         return response($incomeTest,200);
     }
