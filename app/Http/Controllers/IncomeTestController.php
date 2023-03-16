@@ -36,8 +36,8 @@ class IncomeTestController extends Controller
                 'size' => ['required', 'integer'],
                 'array_table' => ['required'],
                 'aggregate_id' => ['required', 'exists:aggregates,id'],
-                'deviation' => ['required', 'integer'],
-                'effectiveness' => ['required', 'integer'],
+                'deviation' => ['required', 'string'],
+                'effectiveness' => ['required', 'string'],
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'income_item_id' => ['required', 'exists:income_items,id'],
                 'method' => ['required', 'boolean'],
@@ -55,15 +55,22 @@ class IncomeTestController extends Controller
                 'method' => $request->method,
             ]);
 
-            $aggregate = Aggregate::find($request->aggregate_id);
-            $ignore = [];
-            if($aggregate->title){
-                $ignore = [1];
+            if($incomeTest->first_size){
+                $aggregate = Aggregate::find($request->aggregate_id);
+                $ignore = [];
+                if($aggregate->title){
+                    $ignore = [1];
+                }
+
+                Excel::import(
+                    new ExcelImport(
+                        random: $request->size,
+                        ignore: $ignore,
+                        method: $request->method,
+                        incomeTestID: $incomeTest->id),
+                    $aggregate->path
+                );
             }
-
-            //        $pathToCsv = $this->storeFile('excel', 'excels', $request);
-
-            Excel::import(new ExcelImport(random: $request->size, ignore: $ignore, method: $request->method, incomeTestID: $incomeTest->id), $aggregate->path);
         }
 
         if($request->income_test_id){
@@ -75,25 +82,27 @@ class IncomeTestController extends Controller
                     new NatureControlRule(natureControlID: $incomeTest->nature_control_id, incomeID: $incomeTest->id)]
             ]);
 
-            $aggregate = Aggregate::find($incomeTest->aggregate_id);
-            $incomeTestExcel = IncomeTestExcel::where('income_test_id', $incomeTest->id)->first()->data;
-
-            if ($aggregate->title){
-                $incomeTestExcel[] = ["row" => 1];
-            }
-
-            $ignore = array_column($incomeTestExcel, 'row');
-
-            Excel::import(
-                new ExcelImport(
-                    random: $request->size,
-                    ignore: $ignore,
-                    method: $incomeTest->method,
-                    incomeTestID: $incomeTest->id), $aggregate->path);
-
             $incomeTest->update([
                 'second_size' => $request->size,
             ]);
+
+            if($incomeTest->first_size) {
+                $aggregate = Aggregate::find($incomeTest->aggregate_id);
+                $incomeTestExcel = IncomeTestExcel::where('income_test_id', $incomeTest->id)->first()->data;
+
+                if ($aggregate->title) {
+                    $incomeTestExcel[] = ["row" => 1];
+                }
+
+                $ignore = array_column($incomeTestExcel, 'row');
+
+                Excel::import(
+                    new ExcelImport(
+                        random: $request->size,
+                        ignore: $ignore,
+                        method: $incomeTest->method,
+                        incomeTestID: $incomeTest->id), $aggregate->path);
+            }
         }
 
         return response(['message' => 'Success', 'income_test_id' => $incomeTest->id], 200);

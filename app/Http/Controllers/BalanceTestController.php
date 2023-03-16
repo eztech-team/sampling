@@ -47,8 +47,8 @@ class BalanceTestController extends Controller
                 'size' => ['required', 'integer'],
                 'array_table' => ['required'],
                 'aggregate_id' => ['required', 'exists:aggregates,id'],
-                'deviation' => ['required', 'integer'],
-                'effectiveness' => ['required', 'integer'],
+                'deviation' => ['required', 'string'],
+                'effectiveness' => ['required', 'string'],
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'balance_item_id' => ['required', 'exists:balance_items,id'],
                 'method' => ['required', 'boolean']
@@ -66,13 +66,22 @@ class BalanceTestController extends Controller
                 'method' => $request->method,
             ]);
 
-            $aggregate = Aggregate::find($request->aggregate_id);
-            $ignore = [];
-            if($aggregate->title){
-                $ignore = [1];
-            }
+            if($balanceTest->first_size){
+                $aggregate = Aggregate::find($request->aggregate_id);
+                $ignore = [];
+                if($aggregate->title){
+                    $ignore = [1];
+                }
 
-            Excel::import(new ExcelImport(random: $request->size, ignore: $ignore, method: $request->method, balanceTestId: $balanceTest->id), $aggregate->path);
+                Excel::import(
+                    new ExcelImport(
+                        random: $request->size,
+                        ignore: $ignore,
+                        method: $request->method,
+                        balanceTestId: $balanceTest->id),
+                    $aggregate->path
+                );
+            }
         }
 
         if($request->balance_test_id){
@@ -83,26 +92,27 @@ class BalanceTestController extends Controller
                     'exists:nature_controls,id',
                     new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)]
             ]);
-
-            $aggregate = Aggregate::find($balanceTest->aggregate_id);
-            $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
-
-            if ($aggregate->title){
-                $balanceTestExcel[] = ["row" => 1];
-            }
-
-            $ignore = array_column($balanceTestExcel, 'row');
-
-            Excel::import(
-                new ExcelImport(
-                    random: $request->size,
-                    ignore: $ignore,
-                    method: $balanceTest->method,
-                    balanceTestId: $balanceTest->id), $aggregate->path);
-
             $balanceTest->update([
                 'second_size' => $request->size,
             ]);
+
+            if($balanceTest->second_size){
+                $aggregate = Aggregate::find($balanceTest->aggregate_id);
+                $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
+
+                if ($aggregate->title){
+                    $balanceTestExcel[] = ["row" => 1];
+                }
+
+                $ignore = array_column($balanceTestExcel, 'row');
+
+                Excel::import(
+                    new ExcelImport(
+                        random: $request->size,
+                        ignore: $ignore,
+                        method: $balanceTest->method,
+                        balanceTestId: $balanceTest->id), $aggregate->path);
+            }
         }
 
         return response(['message' => 'Success', 'balance_test_id' => $balanceTest->id], 200);
