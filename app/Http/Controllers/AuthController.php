@@ -45,7 +45,7 @@ class AuthController extends Controller
             return response(['token' => $service['token']], 200);
         }
 
-        return response(['message' => 'Unauthorized'], 401);
+        return response(['message' => 'Unauthorized'], 400);
     }
 
     public function register(Request $request)

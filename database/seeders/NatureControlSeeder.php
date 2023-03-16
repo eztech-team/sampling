@@ -60,7 +60,7 @@ class NatureControlSeeder extends Seeder
         NatureControl::create([
             'name' => 'The number of occurrences ranges between 50-250 times',
             'size' => 50,
-            'first_error' => 2,
+            'first_error' => 0,
             'second_error' => 0,
         ]);
     }
