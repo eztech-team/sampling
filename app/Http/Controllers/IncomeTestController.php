@@ -67,7 +67,7 @@ class IncomeTestController extends Controller
         }
 
         if($request->income_test_id){
-            $incomeTest = IncomeTest::find($request->balance_id);
+            $incomeTest = IncomeTest::find($request->income_test_id);
             $request->validate([
                 'size' => ['required', 'integer'],
                 'nature_control_id' => [
