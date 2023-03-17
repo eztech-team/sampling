@@ -52,6 +52,13 @@ Route::controller(VerifyEmailController::class)->group(function (){
     Route::post('resend/email', 'resendEmail');
 });
 
+Route::prefix('companies')->group(function (){
+    Route::controller(UserController::class)->group(function (){
+        Route::post('create-user', 'createUser');
+        Route::post('send-notification', 'sendNotification')->middleware('auth:sanctum');
+    });
+});
+
 Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
     Route::group(['prefix' => 'companies'], function (){
         Route::controller(CompanyController::class)->group(function (){
@@ -142,7 +149,6 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
           Route::post('/income-error', 'incomeError');
        });
     });
-
     /*
      * Nature of control and frequency of performance
      * */

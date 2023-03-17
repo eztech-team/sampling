@@ -82,4 +82,9 @@ class User extends Authenticatable
         return (bool)UserProjectPermission::where('permission_id', $permission_id)->where('project_id', $project_id)->first();
     }
 
+    public function company()
+    {
+        return $this->belongsToMany(Company::class);
+    }
+
 }
