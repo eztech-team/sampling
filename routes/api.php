@@ -14,6 +14,7 @@ use App\Http\Controllers\ResultTocController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
 use App\Models\Company;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -53,9 +54,14 @@ Route::controller(VerifyEmailController::class)->group(function (){
 });
 
 Route::prefix('companies')->group(function (){
-    Route::controller(UserController::class)->group(function (){
-        Route::post('create-user', 'createUser');
-        Route::post('send-notification', 'sendNotification')->middleware('auth:sanctum');
+    Route::post('create-user', [UserController::class, 'createUser']);
+
+    Route::controller(UserController::class)
+        ->middleware('auth:sanctum')
+        ->group(function (){
+            Route::post('send-notification', 'sendNotification');
+            Route::get('users', 'users');
+            Route::post('add-project-team', 'addUserToProjectsAndTeam');
     });
 });
 
@@ -146,7 +152,9 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
        Route::controller(ResultTocController::class)->group(function (){
            Route::get('/errors', 'errors');
            Route::post('/balance-error', 'balanceError');
-          Route::post('/income-error', 'incomeError');
+           Route::post('/income-error', 'incomeError');
+           Route::post('/income-comments', 'incomeComments');
+           Route::post('/balance-comments', 'balanceComments');
        });
     });
     /*

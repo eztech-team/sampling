@@ -14,6 +14,8 @@ class IncomeItemController extends Controller
      */
     public function index()
     {
+        $this->authorize('item-index');
+
         request()->validate([
             'project_id' => ['required', 'exists:projects,id']
         ]);
@@ -32,6 +34,8 @@ class IncomeItemController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('item-create');
+
         $data = $request->validate([
             'name' => ['required', 'max:255'],
             'description' => ['nullable', 'max:255'],
@@ -52,6 +56,8 @@ class IncomeItemController extends Controller
      */
     public function show(IncomeItem $incomeItem)
     {
+        $this->authorize('item-edit', $incomeItem);
+
         return response($incomeItem, 200);
     }
 
@@ -64,6 +70,8 @@ class IncomeItemController extends Controller
      */
     public function update(Request $request, IncomeItem $incomeItem)
     {
+        $this->authorize('item-edit', $incomeItem);
+
         $request->validate([
             'name' => ['required', 'max:255'],
             'description' => ['nullable', 'max:255'],
@@ -88,6 +96,8 @@ class IncomeItemController extends Controller
      */
     public function destroy(IncomeItem $incomeItem)
     {
+        $this->authorize('item-delete');
+
         $incomeItem->delete();
 
         return response(['message' => 'Success'], 200);

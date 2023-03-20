@@ -18,6 +18,8 @@ class IncomeTestController extends Controller
 
     public function index()
     {
+        $this->authorize('test-index');
+
         $balanceItem = IncomeItem::where('project_id', request()->project_id)
             ->with('tests')
             ->get();
@@ -27,7 +29,7 @@ class IncomeTestController extends Controller
 
     public function store(Request $request)
     {
-        //Add comments
+        $this->authorize('test-create');
 
         if(!$request->income_test_id){
             $request->validate([
@@ -112,7 +114,7 @@ class IncomeTestController extends Controller
 
     public function show(IncomeTest $incomeTest)
     {
-        //Add comments
+        $this->authorize('test-edit', $incomeTest);
 
         $incomeTest = IncomeTest::where('id', $incomeTest->id)
             ->select('id',
@@ -125,7 +127,8 @@ class IncomeTestController extends Controller
                 'deviation',
                 'income_item_id',
                 'method',
-                'comment',
+                'first_comment',
+                'second_comment',
             )
             ->with(['aggregate', 'natureControl'])->first();
 
@@ -134,6 +137,8 @@ class IncomeTestController extends Controller
 
     public function destroy(IncomeTest $incomeTest)
     {
+        $this->authorize('test-delete');
+
         $incomeTest->forceDelete();
 
         return response(['message' => 'Success'], 200);
@@ -141,6 +146,8 @@ class IncomeTestController extends Controller
 
     public function excel(IncomeTest $incomeTest)
     {
+        $this->authorize('test-create');
+
         $incomeTestExcel = IncomeTestExcel::where('income_test_id', $incomeTest->id)
             ->select('id as income_test_excel_id')
             ->get();

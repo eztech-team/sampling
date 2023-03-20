@@ -29,7 +29,8 @@ return new class extends Migration
             $table->integer('second_size')->nullable();
             $table->boolean('method')->default(0);
             $table->integer('status')->default(2);
-            $table->string('comment')->nullable();
+            $table->string('first_comment')->nullable();
+            $table->string('second_comment')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

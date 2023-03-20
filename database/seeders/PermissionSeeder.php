@@ -34,8 +34,7 @@ class PermissionSeeder extends Seeder
             'name' => 'project-delete',
             'label' => 'delete',
         ]);
-
-        //Test
+        // Balance and Income test
         Permission::create([
             'name' => 'test-index',
             'label' => 'index',
@@ -52,7 +51,23 @@ class PermissionSeeder extends Seeder
             'name' => 'test-delete',
             'label' => 'delete',
         ]);
-
+        // Balance and Income item
+        Permission::create([
+            'name' => 'item-index',
+            'label' => 'index',
+        ]);
+        Permission::create([
+            'name' => 'item-create',
+            'label' => 'create',
+        ]);
+        Permission::create([
+            'name' => 'item-edit',
+            'label' => 'edit',
+        ]);
+        Permission::create([
+            'name' => 'item-delete',
+            'label' => 'delete',
+        ]);
         //Team
         Permission::create([
             'name' => 'team-index',
@@ -70,16 +85,68 @@ class PermissionSeeder extends Seeder
             'name' => 'team-delete',
             'label' => 'delete',
         ]);
+        //User create company
+        Permission::create([
+            'name' => 'user-index',
+            'label' => 'index',
+        ]);
+        Permission::create([
+            'name' => 'user-store',
+            'label' => 'index',
+        ]);
+        Permission::create([
+            'name' => 'user-edit',
+            'label' => 'edit',
+        ]);
+        Permission::create([
+            'name' => 'user-delete',
+            'label' => 'delete',
+        ]);
+        //Aggregate
+        Permission::create([
+            'name' => 'aggregate-index',
+            'label' => 'index',
+        ]);
+        Permission::create([
+            'name' => 'aggregate-create',
+            'label' => 'create',
+        ]);
+        Permission::create([
+            'name' => 'aggregate-edit',
+            'label' => 'edit',
+        ]);
+        Permission::create([
+            'name' => 'aggregate-delete',
+            'label' => 'delete',
+        ]);
+        //Company
+        Permission::create([
+            'name' => 'company-show',
+            'label' => 'store',
+        ]);
+        /*
+         * After creating page for moderators to site we need to attach some permissions for moderator.
+         * Now I have no idea what I will give them.
+         * */
+//        $permissionSiteModerator = Permission::where('name', '=', "company-accept")->get();
 
-        $permissionsAdmin = Permission::all();
-        $permissionsUser = Permission::where('name', '=', "%test%")->get();
+        $permissionsAdmin = Permission::all(); // for company Admins
+
+
+        $permissionsUserTest = Permission::where('name', 'like', "%test%")
+            ->get();
+        $permissionsUserItem = Permission::where('name', 'like', "%item%")
+            ->get();
 
 
         foreach($permissionsAdmin as $permission){
             $permission->roles()->attach(Role::COMPANY_ADMIN);
         }
 
-        foreach($permissionsUser as $permission){
+        foreach($permissionsUserTest as $permission){
+            $permission->roles()->attach(Role::USER);
+        }
+        foreach($permissionsUserItem as $permission){
             $permission->roles()->attach(Role::USER);
         }
     }

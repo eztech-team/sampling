@@ -29,7 +29,7 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('team-store');
+        $this->authorize('team-create');
 
         $request->validate([
             'name' => ['required', 'max:255'],
@@ -50,7 +50,7 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
-        $this->authorize('team-edit');
+        $this->authorize('team-edit', $team);
 
         return response($team->load('users'), 200);
     }
@@ -64,7 +64,7 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
-        $this->authorize('team-edit');
+        $this->authorize('team-edit', $team);
 
         $request->validate([
             'name' => ['required', 'max:255'],

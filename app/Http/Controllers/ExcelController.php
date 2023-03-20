@@ -18,6 +18,8 @@ class ExcelController extends Controller
 
     public function downloadBalance(Request $request)
     {
+        $this->authorize('test-create');
+
         $request->validate([
             'balance_test_excel_id' => ['required', 'exists:balance_test_excels,id']
         ]);
@@ -48,6 +50,8 @@ class ExcelController extends Controller
 
     public function downloadIncome(Request $request)
     {
+        $this->authorize('test-create');
+
         $request->validate([
             'income_test_excel_id' => ['required', 'exists:income_test_excels,id']
         ]);

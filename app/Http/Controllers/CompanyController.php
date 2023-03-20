@@ -9,6 +9,8 @@ class CompanyController extends Controller
 {
     public function show()
     {
+        $this->authorize('company-show');
+
         $company = Company::whereHas('users', function ($user){
             $user->where('id', auth('sanctum')->id());
         })->first();

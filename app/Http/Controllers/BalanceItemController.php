@@ -15,6 +15,8 @@ class BalanceItemController extends Controller
      */
     public function index()
     {
+        $this->authorize('item-index');
+
         request()->validate([
             'project_id' => ['required', 'exists:projects,id']
         ]);
@@ -33,6 +35,8 @@ class BalanceItemController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('item-create');
+
         $data = $request->validate([
             'name' => ['required', 'max:255'],
             'description' => ['nullable', 'max:255'],
@@ -53,6 +57,8 @@ class BalanceItemController extends Controller
      */
     public function show(BalanceItem $balanceItem)
     {
+        $this->authorize('item-edit', $balanceItem);
+
         return response($balanceItem, 200);
     }
 
@@ -65,6 +71,8 @@ class BalanceItemController extends Controller
      */
     public function update(Request $request, BalanceItem $balanceItem)
     {
+        $this->authorize('item-edit', $balanceItem);
+
         $request->validate([
             'name' => ['required', 'max:255'],
             'description' => ['nullable', 'max:255'],
@@ -89,6 +97,8 @@ class BalanceItemController extends Controller
      */
     public function destroy(BalanceItem $balanceItem)
     {
+        $this->authorize('item-delete');
+
         $balanceItem->delete();
 
         return response(['message' => 'Success'], 200);

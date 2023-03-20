@@ -13,6 +13,8 @@ class AggregateController extends Controller
 
     public function index()
     {
+        $this->authorize('aggregate-index');
+
         request()->validate([
             'project_id' => ['required', 'exists:projects,id']
         ]);
@@ -22,6 +24,8 @@ class AggregateController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('aggregate-create');
+
         $request->validate([
             'excel' => ['required', 'mimes:xls'],
             'name' => ['required', 'max:255', 'unique:aggregates'],

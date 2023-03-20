@@ -23,6 +23,8 @@ class BalanceTestController extends Controller
      */
     public function index()
     {
+        $this->authorize('test-index');
+
         $balanceItem = BalanceItem::where('project_id', request()->project_id)
             ->with('tests')
             ->get();
@@ -38,7 +40,7 @@ class BalanceTestController extends Controller
      */
     public function store(Request $request)
     {
-        //Add comments
+        $this->authorize('test-create');
 
         if(!$request->balance_test_id){
             $request->validate([
@@ -52,7 +54,7 @@ class BalanceTestController extends Controller
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'balance_item_id' => ['required', 'exists:balance_items,id'],
                 'method' => ['required', 'boolean'],
-                'comment' => ['nullable', 'max:255']
+                'first_comment' => ['nullable', 'max:255']
             ]);
 
             $balanceTest = BalanceTest::create([
@@ -65,7 +67,7 @@ class BalanceTestController extends Controller
                 'nature_control_id' => $request->nature_control_id,
                 'balance_item_id' => $request->balance_item_id,
                 'method' => $request->method,
-                'comment' => $request->comment
+                'first_comment' => $request->first_comment
             ]);
 
             if($balanceTest->first_size){
@@ -90,12 +92,16 @@ class BalanceTestController extends Controller
             $balanceTest = BalanceTest::find($request->balance_test_id);
             $request->validate([
                 'size' => ['required', 'integer'],
+                'first_comment' => ['nullable', 'max:255'],
+                'second_comment' => ['nullable', 'max:255'],
                 'nature_control_id' => [
                     'exists:nature_controls,id',
                     new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)]
             ]);
             $balanceTest->update([
                 'second_size' => $request->size,
+                'second_comment' => $request->second_comment,
+                'first_comment' => $request->first_comment,
             ]);
 
             if($balanceTest->second_size){
@@ -128,7 +134,8 @@ class BalanceTestController extends Controller
      */
     public function show(BalanceTest $balanceTest)
     {
-        //Add comments
+        $this->authorize('test-edit', $balanceTest);
+
         $balanceTest = BalanceTest::where('id', $balanceTest->id)
             ->select('id',
                 'name',
@@ -140,7 +147,8 @@ class BalanceTestController extends Controller
                 'deviation',
                 'balance_item_id',
                 'method',
-                'comment',
+                'first_comment',
+                'second_comment',
             )
             ->with(['aggregate', 'natureControl'])->first();
 
@@ -153,8 +161,11 @@ class BalanceTestController extends Controller
      * @param  \App\Models\BalanceTest  $balanceTest
      * @return \Illuminate\Http\Response
      */
+
     public function destroy(BalanceTest $balanceTest)
     {
+        $this->authorize('test-delete');
+
         $balanceTest->forceDelete();
 
         return response(['message' => 'Success'], 200);
@@ -162,6 +173,8 @@ class BalanceTestController extends Controller
 
     public function excel(BalanceTest $balanceTest)
     {
+        $this->authorize('test-store');
+
         $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)
             ->select('id as balance_test_excel_id')
             ->get();

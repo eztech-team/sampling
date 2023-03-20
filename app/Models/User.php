@@ -87,4 +87,14 @@ class User extends Authenticatable
         return $this->belongsToMany(Company::class);
     }
 
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class);
+    }
+
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class);
+    }
+
 }

@@ -37,6 +37,18 @@ class BalanceTest extends Model
         return $this->hasMany(BalanceTestExcel::class);
     }
 
+    public function comments()
+    {
+        return $this->hasOne(ResultToc::class)
+            ->select(
+                'balance_test_id',
+                'first_comment',
+                'first_link',
+                'second_comment',
+                'second_link',
+            );
+    }
+
     protected function data() : Attribute
     {
         return Attribute::make(

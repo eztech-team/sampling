@@ -17,6 +17,8 @@ class UserController extends Controller
 {
     public function index()
     {
+        $this->authorize('user-index');
+
         $users = User::whereHas('company', function ($q){
             $q->where('user_id', auth('sanctum')->id())->get();
         });
@@ -26,18 +28,24 @@ class UserController extends Controller
 
     public function sendNotification(Request $request)
     {
-        $request->validate(['email' => ['required', 'unique:users']]);
-        $email = $request->email;
-        $token = Str::uuid();
-        $companyID = CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
+        $this->authorize('user-store');
 
-        CreateUserMail::create([
-            'email' => $email,
-            'token' => $token,
-            'company_id' => $companyID,
+        $request->validate([
+            'emails' => ['required', 'array'],
         ]);
 
-        SendMailJob::dispatch($email, $token);
+        $companyID = CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
+        foreach ($request->emails as $email){
+            $token = Str::uuid();
+
+            CreateUserMail::create([
+                'email' => $email,
+                'token' => $token,
+                'company_id' => $companyID,
+            ]);
+
+            SendMailJob::dispatch($email, $token);
+        }
 
         return response(['message' => 'Message sent successfully'], 200);
     }
@@ -74,6 +82,54 @@ class UserController extends Controller
         }
 
         return response(['message' => 'Token or email incorrect'], 403);
+    }
 
+    public function users()
+    {
+        $this->authorize('user-edit');
+
+        $users = $this->checkUser();
+
+        $users = $users
+            ->select('id', 'name', 'surname', 'email', 'role_id')
+            ->with('role')
+            ->get();
+
+        return response($users, 200);
+    }
+
+    public function addUserToProjectsAndTeam(Request $request)
+    {
+        $this->authorize('user-store');
+
+        $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'projects' => ['nullable'],
+            'teams' => ['nullable'],
+            'projects.*.project_id' => ['required_if:projects,!=,null']
+        ]);
+
+        $user = $this->checkUser();
+
+        $user = $user->where('id', $request->user_id)
+            ->first();
+
+        if($request->projects){
+            $user->projects()->sync($request->projects, false);
+        }
+        if($request->teams){
+            $user->teams()->sync($request->teams, false);
+        }
+
+        return response(['message' => 'Success'], 200);
+    }
+
+    private function checkUser()
+    {
+        $companyID = CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
+
+        return User::whereHas('company', function ($q) use($companyID){
+            $q->where('id', $companyID);
+        });
     }
 }

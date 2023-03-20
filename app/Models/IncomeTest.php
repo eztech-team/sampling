@@ -37,6 +37,17 @@ class IncomeTest extends Model
         return $this->hasMany(IncomeTestExcel::class);
     }
 
+    public function comments()
+    {
+        return $this->hasOne(ResultToc::class)->select(
+            'income_test_id',
+            'first_comment',
+            'first_link',
+            'second_comment',
+            'second_link',
+        );
+    }
+
     protected function data() : Attribute
     {
         return Attribute::make(
