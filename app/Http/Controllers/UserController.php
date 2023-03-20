@@ -38,13 +38,13 @@ class UserController extends Controller
         foreach ($request->emails as $email){
             $token = Str::uuid();
 
-            CreateUserMail::create([
+            $createUser = CreateUserMail::create([
                 'email' => $email,
                 'token' => $token,
                 'company_id' => $companyID,
             ]);
 
-            SendMailJob::dispatch($email, $token);
+            SendMailJob::dispatch($createUser->email, $createUser->token);
         }
 
         return response(['message' => 'Message sent successfully'], 200);
