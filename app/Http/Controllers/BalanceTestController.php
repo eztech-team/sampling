@@ -173,7 +173,7 @@ class BalanceTestController extends Controller
 
     public function excel(BalanceTest $balanceTest)
     {
-        $this->authorize('test-store');
+        $this->authorize('test-create');
 
         $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)
             ->select('id as balance_test_excel_id')
