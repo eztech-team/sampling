@@ -8,6 +8,7 @@ use App\Models\CompanyUser;
 use App\Models\CreateUserMail;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -88,11 +89,11 @@ class UserController extends Controller
     {
         $this->authorize('user-edit');
 
-        $users = $this->checkUser();
+        $users = $this->checkUser()->get();
+        $users = collect($users);
 
         $users = $this->filter(request()->filter, $users)
-            ->with('role')
-            ->get();
+            ->all();
 
         return response($users, 200);
     }
@@ -128,17 +129,18 @@ class UserController extends Controller
         $companyID = CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
 
         return User::whereHas('company', function ($q) use($companyID){
-            $q->where('id', $companyID);
-        })->select('id', 'name', 'surname', 'email', 'role_id');
+            $q->where('id', $companyID)
+            ;
+        })->select('id', 'name', 'surname', 'email');
     }
 
-    private function filter($filter, $user){
+    private function filter($filter, $users){
         if($filter){
-            return $user->where('name', 'ilike', "%$filter%")
-                ->orWhere('surname', 'ilike' ,"%$filter%")
-                ->orWhere('email', 'ilike' ,"%$filter%");
+            $users = $users->filter(function ($user) use ($filter){
+                return false !== stripos($user, $filter);
+            });
         }
 
-        return $user;
+        return collect($users);
     }
 }
