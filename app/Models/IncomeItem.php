@@ -28,7 +28,7 @@ class IncomeItem extends Model
             ->orderBy('id', 'asc');
     }
 
-    public function td()
+    public function tds()
     {
         return $this->hasMany(Td::class)
             ->where('deleted_at', null)
