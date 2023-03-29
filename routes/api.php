@@ -167,7 +167,8 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
 
     Route::group(['prefix' => 'td'], function (){
         Route::controller(TdController::class)->group(function (){
-            Route::get('/', 'index');
+            Route::get('/balance', 'balanceTd');
+            Route::get('/income', 'incomeTd');
             Route::post('/', 'store');
             Route::get('/{id}', 'show');
             Route::post('/{id}/matrix', 'storeMatrix');

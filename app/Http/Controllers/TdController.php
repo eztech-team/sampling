@@ -13,21 +13,28 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class TdController extends Controller
 {
-    public function index()
+    public function balanceTd()
     {
         request()->validate([
             'project_id' => ['required', 'exists:projects,id']
         ]);
-        if(request()->balance){
-            $items = BalanceItem::where('project_id', request()->project_id)
-                ->with('tds:id,name,balance_item_id,status,array_table')
-                ->get();
-        }
-        else{
-            $items = IncomeItem::where('project_id', request()->project_id)
-                ->with('tds:id,name,income_item_id,status,array_table')
-                ->get();
-        }
+
+        $items = BalanceItem::where('project_id', request()->project_id)
+            ->with('tds:id,name,balance_item_id,status,array_table')
+            ->get();
+
+        return response($items, 200);
+    }
+
+    public function IncomeTd()
+    {
+        request()->validate([
+            'project_id' => ['required', 'exists:projects,id']
+        ]);
+
+        $items = IncomeItem::where('project_id', request()->project_id)
+            ->with('tds:id,name,income_item_id,status,array_table')
+            ->get();
 
         return response($items, 200);
     }
@@ -50,7 +57,7 @@ class TdController extends Controller
 
         $td->excels()->attach($request->excels, ['data' => json_encode('123')]);
 
-        return response(['message' => 'Success'], 200);
+        return response(['message' => 'Success', 'td_id' => $td->id], 200);
     }
 
     public function storeMatrix(Request $request)
@@ -97,9 +104,9 @@ class TdController extends Controller
             ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method')
             ->first();
 
-        $td->setKeyName('td_method_name');
-        $td->setKeyType('string');
-        $td->setAttribute('td_method_name', Td::$methods[$td->td_method]);
+//        $td->setKeyName('td_method_name');
+//        $td->setKeyType('string');
+//        $td->setAttribute('td_method_name', Td::$methods[$td->td_method]);
 
         return response($td, 200);
     }
@@ -119,10 +126,10 @@ class TdController extends Controller
             )
             ->first();
 
-        $tdMatrix->setAttribute(
-            'material_misstatement', Td::$likelihoodOfMaterialMisstatement[$tdMatrix->material_misstatement]
-        );
-        $tdMatrix->setAttribute('control_risk', Td::$controlRisk[$tdMatrix->control_risk]);
+//        $tdMatrix->setAttribute(
+//            'material_misstatement', Td::$likelihoodOfMaterialMisstatement[$tdMatrix->material_misstatement]
+//        );
+//        $tdMatrix->setAttribute('control_risk', Td::$controlRisk[$tdMatrix->control_risk]);
 
         if($tdMatrix->balance_test_id){
             $tdMatrix->setKeyName('balance_test_name');
