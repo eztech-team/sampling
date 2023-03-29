@@ -100,8 +100,8 @@ class TdController extends Controller
     public function show(Request $request)
     {
         $td = Td::where('id', $request->id)
-            ->with('excels:id,name,path')
-            ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method')
+            ->with('excels:id as aggregate_id,name,path')
+            ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method', 'name')
             ->first();
 
 //        $td->setKeyName('td_method_name');
