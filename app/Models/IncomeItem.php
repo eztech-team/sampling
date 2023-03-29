@@ -24,7 +24,6 @@ class IncomeItem extends Model
     public function tests()
     {
         return $this->hasMany(IncomeTest::class)
-            ->where('deleted_at', null)
             ->orderBy('id', 'asc');
     }
 
