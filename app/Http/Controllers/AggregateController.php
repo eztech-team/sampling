@@ -21,10 +21,8 @@ class AggregateController extends Controller
 
         $aggregate = Aggregate::where('project_id', request()->project_id);
 
-        if(!request()->amount_column){
+        if(request()->amount_column){
             $aggregate = $aggregate->where('amount_column', '!=', null);
-        }else{
-            $aggregate = $aggregate->where('amount_column', '=', null);
         }
 
         return response($aggregate->get(), 200);
