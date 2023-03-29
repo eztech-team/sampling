@@ -16,7 +16,9 @@ class TeamController extends Controller
     {
         $this->authorize('team-index');
 
-        $teams = Team::whereHas('company')->with('users')->get();
+        $teams = Team::whereHas('company', function ($q){
+                $q->where('id', auth('sanctum')->id());
+        })->with('users:id,name,surname,email')->get();
 
         return response($teams, 200);
     }
@@ -35,8 +37,11 @@ class TeamController extends Controller
             'name' => ['required', 'max:255'],
             'users' => ['nullable'],
         ]);
+        $team = Team::create([
+            'name' => $request->name,
+            'company_id' => auth('sanctum')->user()->companyID(),
+        ]);
 
-        $team = Team::create($request->all());
         $team->users()->attach($request->users);
 
         return response(['message' => 'Team created successfully'], 200);
@@ -70,8 +75,10 @@ class TeamController extends Controller
             'name' => ['required', 'max:255'],
             'users' => ['nullable'],
         ]);
+        $team->update([
+            'name' => $request->name
+        ]);
 
-        $team->update($request->all());
         $team->users()->sync($request->users);
 
         return response(['message' => 'Team updated successfully'], 200);

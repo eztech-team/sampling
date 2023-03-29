@@ -90,10 +90,7 @@ class UserController extends Controller
 
         $users = $this->checkUser();
 
-        $users = $users
-            ->select('id', 'name', 'surname', 'email', 'role_id')
-            ->with('role')
-            ->get();
+        $users = $this->filter(request()->filter, $users)->get();
 
         return response($users, 200);
     }
@@ -130,6 +127,17 @@ class UserController extends Controller
 
         return User::whereHas('company', function ($q) use($companyID){
             $q->where('id', $companyID);
-        });
+        })->select('id', 'name', 'surname', 'email', 'role_id')
+            ->with('role');
+    }
+
+    private function filter($filter, $user){
+        if($filter){
+            return $user->where('name', 'ilike', "%$filter%")
+                ->orWhere('surname', 'ilike' ,"%$filter%")
+                ->orWhere('email', 'ilike' ,"%$filter%");
+        }
+
+        return $user;
     }
 }

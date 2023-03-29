@@ -33,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
                 return true;
             }
 
-            if(request()->isMethod('put') || request()->isMethod('edit')){
+            if(request()->isMethod('put') || request()->isMethod('get')){
                 if($permission = Permission::where('name', $permission)->first()){
                     return $user->userProjectPermission($project[0]->id, $permission->id);
                 }

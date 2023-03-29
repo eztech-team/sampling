@@ -12,7 +12,8 @@ class Team extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'company_id'
     ];
 
     public function users(): BelongsToMany
@@ -22,8 +23,6 @@ class Team extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class)->whereHas('user', function($q){
-            $q->where('id', auth('sanctum')->id());
-        });
+        return $this->belongsTo(Company::class);
     }
 }

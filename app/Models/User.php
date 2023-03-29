@@ -97,4 +97,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Team::class);
     }
 
+    public function companyID()
+    {
+        return CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
+    }
+
 }

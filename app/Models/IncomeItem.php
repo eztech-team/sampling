@@ -28,6 +28,13 @@ class IncomeItem extends Model
             ->orderBy('id', 'asc');
     }
 
+    public function td()
+    {
+        return $this->hasMany(Td::class)
+            ->where('deleted_at', null)
+            ->orderBy('id', 'asc');
+    }
+
     protected function data() : Attribute
     {
         return Attribute::make(

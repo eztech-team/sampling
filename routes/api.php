@@ -11,6 +11,8 @@ use App\Http\Controllers\IncomeTestController;
 use App\Http\Controllers\NatureControlController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ResultTocController;
+use App\Http\Controllers\TdController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
 use App\Models\Company;
@@ -71,6 +73,10 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::post('/', 'show');
         });
     });
+    /*
+     * ********** Teams *************
+     * */
+    Route::apiResource('teams', TeamController::class);
     /* *
      * *********** Projects **********
      * */
@@ -103,6 +109,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
         Route::controller(AggregateController::class)->group(function(){
             Route::get('/', 'index');
             Route::post( '/', 'store');
+//            Route::post( '/td', 'storeTD');
         });
     });
     /* *
@@ -156,6 +163,16 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
            Route::post('/income-comments', 'incomeComments');
            Route::post('/balance-comments', 'balanceComments');
        });
+    });
+
+    Route::group(['prefix' => 'td'], function (){
+        Route::controller(TdController::class)->group(function (){
+            Route::get('/', 'index');
+            Route::post('/', 'store');
+            Route::get('/{id}', 'show');
+            Route::post('/{id}/matrix', 'storeMatrix');
+            Route::get('/{id}/matrix', 'showMatrix');
+        });
     });
     /*
      * Nature of control and frequency of performance

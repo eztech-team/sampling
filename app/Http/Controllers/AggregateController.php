@@ -19,7 +19,15 @@ class AggregateController extends Controller
             'project_id' => ['required', 'exists:projects,id']
         ]);
 
-        return response(Aggregate::where('project_id', request()->project_id)->get(), 200);
+        $aggregate = Aggregate::where('project_id', request()->project_id);
+
+        if(!request()->amount_column){
+            $aggregate = $aggregate->where('amount_column', '!=', null);
+        }else{
+            $aggregate = $aggregate->where('amount_column', '=', null);
+        }
+
+        return response($aggregate->get(), 200);
     }
 
     public function store(Request $request)
@@ -46,4 +54,40 @@ class AggregateController extends Controller
 
         return response(['message' => 'Success', 'aggregate_id' => $aggregate->id], 200);
     }
+//
+//    public function storeTD(Request $request)
+//    {
+//        $request->validate([
+//            'excels' => ['required', 'mimes:xls'],
+//            'name' => ['required', 'max:255', 'unique:aggregates'],
+//            'amount_column' => ['integer'],
+//            'title' => ['required', 'boolean'],
+//            'project_id' => ['required', 'exists:projects,id']
+//        ]);
+//
+//        $aggregateIDs = [];
+//
+//        foreach ($request->excels as $row){
+//            if ($request->hasFile($row)){
+//
+//                $path = $request->file($row)
+//                    ->store('excels');
+//
+//                $aggregate = Aggregate::create([
+//                    'name' => $request->name,
+//                    'path' => $path,
+//                    'amount_column' => $request->amount_column,
+//                    'title' => $request->title,
+//                    'project_id' => $request->project_id
+//                ]);
+//
+//                $aggregateIDs = $aggregate->id;
+//            }
+//        }
+//
+//        return response([
+//            'aggregate_ids' => $aggregateIDs,
+//            'message' => 'Success'
+//        ], 200);
+//    }
 }

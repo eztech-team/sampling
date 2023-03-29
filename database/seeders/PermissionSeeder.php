@@ -120,7 +120,7 @@ class PermissionSeeder extends Seeder
             'label' => 'delete',
         ]);
         //Company
-        Permission::create([
+        $company = Permission::create([
             'name' => 'company-show',
             'label' => 'store',
         ]);
@@ -135,7 +135,12 @@ class PermissionSeeder extends Seeder
 
         $permissionsUserTest = Permission::where('name', 'like', "%test%")
             ->get();
+
         $permissionsUserItem = Permission::where('name', 'like', "%item%")
+            ->get();
+        $permissionsUserProject = Permission::where('name', 'like', "%project%")
+            ->get();
+        $permissionsUserAggregarte = Permission::where('name', 'like', "%aggregate%")
             ->get();
 
 
@@ -149,5 +154,13 @@ class PermissionSeeder extends Seeder
         foreach($permissionsUserItem as $permission){
             $permission->roles()->attach(Role::USER);
         }
+        foreach($permissionsUserProject as $permission){
+            $permission->roles()->attach(Role::USER);
+        }
+        foreach($permissionsUserAggregarte as $permission){
+            $permission->roles()->attach(Role::USER);
+        }
+        $permission = Permission::where('name', '=', 'company-show')->first();
+        $permission->roles()->attach(Role::USER);
     }
 }

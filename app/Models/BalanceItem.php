@@ -28,6 +28,12 @@ class BalanceItem extends Model
             ->orderBy('id', 'asc');
     }
 
+    public function tds()
+    {
+        return $this->hasMany(Td::class)
+            ->orderBy('id', 'asc');
+    }
+
     protected function data() : Attribute
     {
         return Attribute::make(
