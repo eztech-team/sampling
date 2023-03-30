@@ -89,13 +89,12 @@ class UserController extends Controller
     {
         $this->authorize('user-edit');
 
-        $users = $this->checkUser()->get();
-        $users = collect($users);
+        $users = $this->checkUser($this->getCompanyID());
 
-        $users = $this->filter(request()->filter, $users)
-            ->all();
+        $users = $this->filter(request()->filter, $users);
 
-        return response($users, 200);
+
+        return response($users->get(), 200);
     }
 
     public function addUserToProjectsAndTeam(Request $request)
@@ -124,23 +123,27 @@ class UserController extends Controller
         return response(['message' => 'Success'], 200);
     }
 
-    private function checkUser()
+    private function checkUser($companyID)
     {
-        $companyID = CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
-
         return User::whereHas('company', function ($q) use($companyID){
-            $q->where('id', $companyID)
+            $q->where('companies.id', $companyID)
             ;
         })->select('id', 'name', 'surname', 'email');
     }
 
     private function filter($filter, $users){
         if($filter){
-            $users = $users->filter(function ($user) use ($filter){
-                return false !== stripos($user, $filter);
+            $users = $users->where(function ($query) use ($filter) {
+                $query->where('name', 'ilike', "%$filter%")
+                    ->orWhere('surname', 'ilike', "%$filter%")
+                    ->orWhere('email', 'ilike', "%$filter%");
             });
         }
 
-        return collect($users);
+        return $users;
+    }
+
+    private function getCompanyID(){
+        return CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
     }
 }
