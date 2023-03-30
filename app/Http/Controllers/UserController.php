@@ -89,7 +89,7 @@ class UserController extends Controller
     {
         $this->authorize('user-edit');
 
-        $users = $this->checkUser($this->getCompanyID());
+        $users = $this->checkUser(User::companyID());
 
         $users = $this->filter(request()->filter, $users);
 
@@ -108,7 +108,7 @@ class UserController extends Controller
             'projects.*.project_id' => ['required_if:projects,!=,null']
         ]);
 
-        $user = $this->checkUser();
+        $user = $this->checkUser(User::companyID());
 
         $user = $user->where('id', $request->user_id)
             ->first();
@@ -141,9 +141,5 @@ class UserController extends Controller
         }
 
         return $users;
-    }
-
-    private function getCompanyID(){
-        return CompanyUser::where('user_id', auth('sanctum')->id())->first()->company_id;
     }
 }

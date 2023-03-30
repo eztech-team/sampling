@@ -21,10 +21,14 @@ class ProjectController extends Controller
         })
             ->orWhereHas('projectPermission', function ($q){
                 $q->where('user_id', auth('sanctum')->id());
-            })
-            ->get();
+            });
 
-        return response($projects, 200);
+        if(request()->filter){
+            $projects = $projects->where('name', 'ilike', "%".request()->filter."%")
+                ->select('id', 'name');
+        }
+
+        return response($projects->get(), 200);
     }
 
     public function store(Request $request)
