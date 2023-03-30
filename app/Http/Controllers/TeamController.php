@@ -36,6 +36,7 @@ class TeamController extends Controller
         $request->validate([
             'name' => ['required', 'max:255'],
             'users' => ['nullable'],
+            'projects' => ['nullable'],
         ]);
         $team = Team::create([
             'name' => $request->name,
@@ -43,6 +44,7 @@ class TeamController extends Controller
         ]);
 
         $team->users()->attach($request->users);
+        $team->projects()->attach($request->projects);
 
         return response(['message' => 'Team created successfully'], 200);
     }
