@@ -18,7 +18,9 @@ class TeamController extends Controller
 
         $teams = Team::whereHas('company', function ($q){
                 $q->where('id', auth('sanctum')->id());
-        })->with('users:id,name,surname,email')->get();
+        })
+            ->with(['users:id,name,surname,email', 'projects:id,name'])
+            ->get();
 
         return response($teams, 200);
     }

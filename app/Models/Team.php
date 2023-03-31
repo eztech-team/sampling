@@ -26,7 +26,7 @@ class Team extends Model
         return $this->belongsTo(Company::class);
     }
 
-    public function projects()
+    public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class);
     }

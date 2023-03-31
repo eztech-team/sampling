@@ -97,6 +97,24 @@ class UserController extends Controller
         return response($users->get(), 200);
     }
 
+    public function usersByRole()
+    {
+        $admins = $this->checkUser(User::companyID())
+            ->where('role_id', '!=', Role::USER)
+            ->with('role:id,name')
+            ->get();
+
+        $users = $this->checkUser(User::companyID())
+            ->where('role_id', '=', Role::USER)
+            ->with('role:id,name')
+            ->get();
+
+        return response([
+            'admins' => $admins,
+            'users' => $users,
+        ], 200);
+    }
+
     public function addUserToProjectsAndTeam(Request $request)
     {
         $this->authorize('user-store');
@@ -128,7 +146,7 @@ class UserController extends Controller
         return User::whereHas('company', function ($q) use($companyID){
             $q->where('companies.id', $companyID)
             ;
-        })->select('id', 'name', 'surname', 'email');
+        })->select('id', 'name', 'surname', 'email', 'role_id');
     }
 
     private function filter($filter, $users){

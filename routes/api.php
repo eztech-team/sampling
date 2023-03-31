@@ -63,6 +63,7 @@ Route::prefix('companies')->group(function (){
         ->group(function (){
             Route::post('send-notification', 'sendNotification');
             Route::get('users', 'users');
+            Route::get('users/role', 'usersByRole');
             Route::post('add-project-team', 'addUserToProjectsAndTeam');
     });
 });
