@@ -99,20 +99,21 @@ class UserController extends Controller
 
     public function usersByRole()
     {
-        $admins = $this->checkUser(User::companyID())
-            ->where('role_id', '!=', Role::USER)
-            ->with('role:id,name')
-            ->get();
+        if (request()->isAdmin) {
+            $admins = $this->checkUser(User::companyID())
+                ->where('role_id', '!=', Role::USER)
+                ->with('role:id,name')
+                ->paginate(10);
 
-        $users = $this->checkUser(User::companyID())
-            ->where('role_id', '=', Role::USER)
-            ->with('role:id,name')
-            ->get();
+            return response($admins, 200);
+        }else{
+            $users = $this->checkUser(User::companyID())
+                ->where('role_id', '=', Role::USER)
+                ->with('role:id,name')
+                ->paginate(10);
 
-        return response([
-            'admins' => $admins,
-            'users' => $users,
-        ], 200);
+            return response($users, 200);
+        }
     }
 
     public function addUserToProjectsAndTeam(Request $request)
