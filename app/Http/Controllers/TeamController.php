@@ -61,7 +61,7 @@ class TeamController extends Controller
     {
         $this->authorize('team-edit', $team);
 
-        return response($team->load('users'), 200);
+        return response($team->load(['users:id,name,surname,email', 'projects:id,name']), 200);
     }
 
     /**
