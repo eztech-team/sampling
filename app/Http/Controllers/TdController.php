@@ -129,6 +129,10 @@ class TdController extends Controller
 
     public function show(Request $request)
     {
+        $request->validate([
+            'id' => 'exists:tds,id'
+        ]);
+
         $td = Td::where('id', $request->id)
             ->with('excels:id as aggregate_id,name,path')
             ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method', 'name')
@@ -152,6 +156,10 @@ class TdController extends Controller
 
     public function showMatrix(Request $request)
     {
+        $request->validate([
+            'id' => 'exists:tds,id'
+        ]);
+
         $tdMatrix = Td::where('id', $request->id)
             ->select('id',
                 'material_misstatement',
