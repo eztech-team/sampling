@@ -35,7 +35,24 @@ class UserSeeder extends Seeder
             'user_id' => $admin->id,
         ]);
 
-        $company->users()->attach($admin->id);
+        $sampling = User::create([
+            'password' => Hash::make('password'),
+            'email' => 'sampling@admin.com',
+            'name' => 'Sampling',
+            'country_id' => 1,
+            'city_id' => 1,
+            'role_id' => Role::COMPANY_ADMIN,
+            'surname' => 'Sampling',
+            'email_verification_send' => now()
+        ]);
+
+        $companySampling = Company::create([
+            'active' => true,
+            'name' => 'TOO Sampling',
+            'user_id' => $admin->id,
+        ]);
+
+        $companySampling->users()->attach($sampling->id);
 
         $user = User::create([
             'password' => Hash::make('password'),

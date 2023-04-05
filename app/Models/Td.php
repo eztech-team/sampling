@@ -11,21 +11,21 @@ class Td extends Model
     use HasFactory;
 
     public static array $methods = [
-        'VALUE-WEIGHTED SELECTION 1',
-        'VALUE-WEIGHTED SELECTION 2 ',
-        'VALUE-WEIGHTED SELECTION 3',
+        'VALUE-WEIGHTED SELECTION',
+        'MONETARY UNIT SAMPLING (MUS)',
+        'HAPHAZARD',
     ];
 
     public static array $likelihoodOfMaterialMisstatement = [
-        'High/ Significant 1',
-        'High/ Significant 2',
-        'High/ Significant 3',
+        'High/ Significant',
+        'Medium',
+        'Low',
     ];
 
     public static array $controlRisk = [
-        'High 1',
-        'High 2',
-        'High 3',
+        'High',
+        'Medium',
+        'Low',
     ];
 
     protected $fillable = [
@@ -45,6 +45,10 @@ class Td extends Model
         'status',
         'balance_test_id',
         'income_test_id',
+        'magnitude',
+        'inherent_risk',
+        'auditor_confidence_level',
+        'misstatement_percentage',
     ];
 
     protected $casts = [

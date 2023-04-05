@@ -93,10 +93,14 @@ class TdController extends Controller
 
     public function storeMatrix(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'material_misstatement' => ['required', 'integer', 'max:2', 'min:0'],
+            'magnitude' => ['required', 'integer', 'max:2', 'min:0'],
+            'inherent_risk' => ['required', 'integer', 'max:2', 'min:0'],
             'control_risk' => ['required', 'integer', 'max:2', 'min:0'],
             'control_risc_comment' => ['nullable'],
+            'auditor_confidence_level' => ['required', 'string'],
+            'misstatement_percentage' => ['required', 'string'],
             'tocs' => ['nullable'],
             'ratio_expected_error' => ['required'],
             'ratio_expected_error_comment' => ['nullable'],
@@ -105,14 +109,9 @@ class TdController extends Controller
 
         $td = Td::where('id', $request->id)->first();
 
-        $td->update([
-            'material_misstatement' => $request->material_misstatement,
-            'control_risk' => $request->control_risk,
-            'control_risc_comment' => $request->control_risc_comment,
-            'ratio_expected_error' => $request->ratio_expected_error,
-            'size' => $request->size,
-            'attempt' => 0,
-        ]);
+        $data['attempt'] = 0;
+
+        $td->update($data);
 
         if($td->balance_item_id){
             $td->update([
@@ -154,6 +153,10 @@ class TdController extends Controller
                 'size',
                 'balance_test_id',
                 'income_test_id',
+                'magnitude',
+                'inherent_risk',
+                'auditor_confidence_level',
+                'misstatement_percentage',
             )
             ->first();
 
