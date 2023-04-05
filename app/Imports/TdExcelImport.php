@@ -38,7 +38,7 @@ class TdExcelImport implements ToCollection
         $totalAmount = 0;
 
         foreach ($items as $item){
-            $totalAmount = $totalAmount + $item[$this->amountColumn];
+            $totalAmount = $totalAmount + $item[$this->amountColumn - 1];
         }
 
         $td = Td::find($this->tdID);
