@@ -137,8 +137,8 @@ class TdController extends Controller
 
             $tdExcelAmount = TdExcel::where('td_id', $td->id)->get()->avg('amount_column');
 
-            if($request->balance_item_id) $projectID = BalanceItem::find($request->balance_item_id)->project_id;
-            if($request->income_item_id) $projectID = IncomeItem::find($request->income_item_id)->project_id;
+            if($td->balance_item_id) $projectID = BalanceItem::find($td->balance_item_id)->project_id;
+            if($td->income_item_id) $projectID = IncomeItem::find($td->income_item_id)->project_id;
 
             $operating_level = Project::find($projectID)->operating_level;
 
