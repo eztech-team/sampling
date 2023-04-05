@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Imports\TdExcelImport;
+use App\Models\Aggregate;
 use App\Models\BalanceItem;
 use App\Models\BalanceTest;
 use App\Models\IncomeItem;
 use App\Models\IncomeTest;
+use App\Models\Project;
 use App\Models\Td;
+use App\Models\TdExcel;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -53,11 +56,39 @@ class TdController extends Controller
             'income_item_id' => ['required_if:balance_item_id,=,null', 'exists:income_items,id']
         ]);
 
+
         $td = Td::create($data);
+        $tdID = $td->id;
+        $ignore = [];
+        foreach ($request->excels as $excelID){
+            $excel_id = $excelID['aggregate_id'];
 
-        $td->excels()->attach($request->excels, ['data' => json_encode('123')]);
+            $path = Aggregate::find($excel_id)->path;
+            $amountColumn = Aggregate::find($excel_id)->amount_column;
+            $aggregateTitle = Aggregate::find($excel_id)->title;
 
-        return response(['message' => 'Success', 'td_id' => $td->id], 200);
+            if($aggregateTitle) $ignore = [1];
+
+            Excel::import(new TdExcelImport(
+                ignore: $ignore,
+                excelID: $excelID,
+                amountColumn: $amountColumn,
+                tdID: $tdID), $path);
+        }
+
+        $tdExcelAmount = TdExcel::where('td_id', $tdID)->get()->avg('amount_column');
+
+        if($request->balance_item_id) $projectID = BalanceItem::find($request->balance_item_id)->project_id;
+        if($request->income_item_id) $projectID = IncomeItem::find($request->income_item_id)->project_id;
+
+        $operating_level = Project::find($projectID)->operating_level;
+
+        return response([
+            'message' => 'Success',
+            'td_id' => $tdID,
+            'amount_sum' => $tdExcelAmount,
+            'operating_level' => $operating_level,
+        ], 200);
     }
 
     public function storeMatrix(Request $request)
