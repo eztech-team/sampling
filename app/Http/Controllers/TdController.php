@@ -208,4 +208,19 @@ class TdController extends Controller
         }
 
     }
+
+    public function getTocsForTD(Request $request)
+    {
+        $items = null;
+
+        if ($request->balance_item_id){
+            $items = BalanceTest::where('balance_item_id', $request->balance_item_id)->select('id', 'name')->get();
+        }
+
+        if ($request->income_item_id){
+            $items = IncomeTest::where('income_item_id', $request->income_item_id)->select('id', 'name')->get();
+        }
+
+        return response($items, 200);
+    }
 }

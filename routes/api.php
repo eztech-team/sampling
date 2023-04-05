@@ -171,6 +171,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/balance', 'balanceTd');
             Route::get('/income', 'incomeTd');
             Route::post('/', 'store');
+            Route::get('/tocs', 'getTocsForTD');
             Route::get('/{id}', 'show');
             Route::post('/{id}/matrix', 'storeMatrix');
             Route::get('/{id}/matrix', 'showMatrix');
