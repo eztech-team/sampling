@@ -127,21 +127,27 @@ class TdController extends Controller
         return response(['message' => 'Success'], 200);
     }
 
-    public function show(Request $request)
+    public function show($id)
     {
         try {
-            $td = Td::where('id', $request->td_id)
+            $td = Td::where('id', $id)
                 ->with('excels:id as aggregate_id,name,path')
-                ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method', 'name')
+                ->select('id',
+                    'array_table',
+                    'stratification',
+                    'count_stratification',
+                    'td_method',
+                    'name',
+                    'balance_item_id',
+                    'income_item_id'
+                )
                 ->first();
-
             $tdExcelAmount = TdExcel::where('td_id', $td->id)->get()->avg('amount_column');
 
             if($td->balance_item_id) $projectID = BalanceItem::find($td->balance_item_id)->project_id;
             if($td->income_item_id) $projectID = IncomeItem::find($td->income_item_id)->project_id;
 
             $operating_level = Project::find($projectID)->operating_level;
-
             return response(
                 [
                     'td' => $td,
