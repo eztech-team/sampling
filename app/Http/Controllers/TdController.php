@@ -129,75 +129,77 @@ class TdController extends Controller
 
     public function show(Request $request)
     {
-        $request->validate([
-            'id' => 'exists:tds,id'
-        ]);
+        try {
+            $td = Td::where('id', $request->id)
+                ->with('excels:id as aggregate_id,name,path')
+                ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method', 'name')
+                ->first();
 
-        $td = Td::where('id', $request->id)
-            ->with('excels:id as aggregate_id,name,path')
-            ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method', 'name')
-            ->first();
+            $tdExcelAmount = TdExcel::where('td_id', $td->id)->get()->avg('amount_column');
 
-        $tdExcelAmount = TdExcel::where('td_id', $td->id)->get()->avg('amount_column');
+            if($request->balance_item_id) $projectID = BalanceItem::find($request->balance_item_id)->project_id;
+            if($request->income_item_id) $projectID = IncomeItem::find($request->income_item_id)->project_id;
 
-        if($request->balance_item_id) $projectID = BalanceItem::find($request->balance_item_id)->project_id;
-        if($request->income_item_id) $projectID = IncomeItem::find($request->income_item_id)->project_id;
+            $operating_level = Project::find($projectID)->operating_level;
 
-        $operating_level = Project::find($projectID)->operating_level;
+            return response(
+                [
+                    'td' => $td,
+                    'excel_amount' => $tdExcelAmount,
+                    'operating_level' => $operating_level
+                ], 200
+            );
+        }catch (\Exception $e){
+            return response(['message' => 'Not found TD'], 400);
+        }
 
-        return response(
-            [
-                'td' => $td,
-                'excel_amount' => $tdExcelAmount,
-                'operating_level' => $operating_level
-            ], 200
-        );
     }
 
     public function showMatrix(Request $request)
     {
-        $request->validate([
-            'id' => 'exists:tds,id'
-        ]);
-
-        $tdMatrix = Td::where('id', $request->id)
-            ->select('id',
-                'material_misstatement',
-                'control_risk',
-                'control_risc_comment',
-                'ratio_expected_error',
-                'ratio_expected_error_comment',
-                'size',
-                'balance_test_id',
-                'income_test_id',
-                'magnitude',
-                'inherent_risk',
-                'auditor_confidence_level',
-                'misstatement_percentage',
-            )
-            ->first();
+        try {
+            $tdMatrix = Td::where('id', $request->id)
+                ->select('id',
+                    'material_misstatement',
+                    'control_risk',
+                    'control_risc_comment',
+                    'ratio_expected_error',
+                    'ratio_expected_error_comment',
+                    'size',
+                    'balance_test_id',
+                    'income_test_id',
+                    'magnitude',
+                    'inherent_risk',
+                    'auditor_confidence_level',
+                    'misstatement_percentage',
+                )
+                ->first();
 
 //        $tdMatrix->setAttribute(
 //            'material_misstatement', Td::$likelihoodOfMaterialMisstatement[$tdMatrix->material_misstatement]
 //        );
 //        $tdMatrix->setAttribute('control_risk', Td::$controlRisk[$tdMatrix->control_risk]);
 
-        if($tdMatrix->balance_test_id){
-            $tdMatrix->setKeyName('balance_test_name');
-            $tdMatrix->setKeyType('string');
-            $tdMatrix->setAttribute(
-                'balance_test_name', BalanceTest::find($tdMatrix->balance_test_id)->name
-            );
+            if($tdMatrix->balance_test_id){
+                $tdMatrix->setKeyName('balance_test_name');
+                $tdMatrix->setKeyType('string');
+                $tdMatrix->setAttribute(
+                    'balance_test_name', BalanceTest::find($tdMatrix->balance_test_id)->name
+                );
+            }
+
+            if($tdMatrix->income_test_id){
+                $tdMatrix->setKeyName('income_test_name');
+                $tdMatrix->setKeyType('string');
+                $tdMatrix->setAttribute(
+                    'income_test_name', IncomeTest::find($tdMatrix->income_test_id)->name
+                );
+            }
+
+            return response($tdMatrix, 200);
+        }catch (\Exception $e){
+            return response(['message' => 'Not found TDs matrix'], 400);
         }
 
-        if($tdMatrix->income_test_id){
-            $tdMatrix->setKeyName('income_test_name');
-            $tdMatrix->setKeyType('string');
-            $tdMatrix->setAttribute(
-                'income_test_name', IncomeTest::find($tdMatrix->income_test_id)->name
-            );
-        }
-
-        return response($tdMatrix, 200);
     }
 }
