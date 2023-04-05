@@ -134,11 +134,20 @@ class TdController extends Controller
             ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method', 'name')
             ->first();
 
-//        $td->setKeyName('td_method_name');
-//        $td->setKeyType('string');
-//        $td->setAttribute('td_method_name', Td::$methods[$td->td_method]);
+        $tdExcelAmount = TdExcel::where('td_id', $td->id)->get()->avg('amount_column');
 
-        return response($td, 200);
+        if($request->balance_item_id) $projectID = BalanceItem::find($request->balance_item_id)->project_id;
+        if($request->income_item_id) $projectID = IncomeItem::find($request->income_item_id)->project_id;
+
+        $operating_level = Project::find($projectID)->operating_level;
+
+        return response(
+            [
+                'td' => $td,
+                'excel_amount' => $tdExcelAmount,
+                'operating_level' => $operating_level
+            ], 200
+        );
     }
 
     public function showMatrix(Request $request)
