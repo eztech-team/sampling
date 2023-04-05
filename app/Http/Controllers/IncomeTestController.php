@@ -43,7 +43,7 @@ class IncomeTestController extends Controller
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'income_item_id' => ['required', 'exists:income_items,id'],
                 'method' => ['required', 'boolean'],
-                'comment' => ['nullable', 'max:255'],
+                'first_comment' => ['nullable', 'max:255'],
             ]);
 
             $incomeTest = IncomeTest::create([
@@ -56,7 +56,7 @@ class IncomeTestController extends Controller
                 'nature_control_id' => $request->nature_control_id,
                 'income_item_id' => $request->income_item_id,
                 'method' => $request->method,
-                'comment' => $request->comment
+                'first_comment' => $request->first_comment
             ]);
 
             if($incomeTest->first_size){
@@ -81,6 +81,8 @@ class IncomeTestController extends Controller
             $incomeTest = IncomeTest::find($request->income_test_id);
             $request->validate([
                 'size' => ['required', 'integer'],
+                'first_comment' => ['nullable', 'max:255'],
+                'second_comment' => ['nullable', 'max:255'],
                 'nature_control_id' => [
                     'exists:nature_controls,id',
                     new NatureControlRule(natureControlID: $incomeTest->nature_control_id, incomeID: $incomeTest->id)]
@@ -88,6 +90,8 @@ class IncomeTestController extends Controller
 
             $incomeTest->update([
                 'second_size' => $request->size,
+                'second_comment' => $request->second_comment,
+                'first_comment' => $request->first_comment,
             ]);
 
             if($incomeTest->first_size) {
