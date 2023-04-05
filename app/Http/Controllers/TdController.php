@@ -129,7 +129,6 @@ class TdController extends Controller
 
     public function show(Request $request)
     {
-        try {
             $td = Td::where('id', $request->id)
                 ->with('excels:id as aggregate_id,name,path')
                 ->select('id', 'array_table', 'stratification', 'count_stratification', 'td_method', 'name')
@@ -149,10 +148,6 @@ class TdController extends Controller
                     'operating_level' => $operating_level
                 ], 200
             );
-        }catch (\Exception $e){
-            return response(['message' => 'Not found TD'], 400);
-        }
-
     }
 
     public function showMatrix(Request $request)
