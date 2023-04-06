@@ -6,6 +6,7 @@ use App\Http\Controllers\BalanceItemController;
 use App\Http\Controllers\BalanceTestController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ExcelController;
+use App\Http\Controllers\HelperController;
 use App\Http\Controllers\IncomeItemController;
 use App\Http\Controllers\IncomeTestController;
 use App\Http\Controllers\NatureControlController;
@@ -74,6 +75,12 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::post('/', 'show');
         });
     });
+    /*
+     * ********** Get teams and users ********
+     * */
+
+    Route::get('users-teams', [HelperController::class, 'getTeamsAndUsers']);
+
     /*
      * ********** Teams *************
      * */

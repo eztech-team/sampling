@@ -21,8 +21,8 @@ class UserController extends Controller
         $this->authorize('user-index');
 
         $users = User::whereHas('company', function ($q){
-            $q->where('user_id', auth('sanctum')->id())->get();
-        });
+            $q->where('user_id', auth('sanctum')->id());
+        })->get();
 
         return response($users, 200);
     }

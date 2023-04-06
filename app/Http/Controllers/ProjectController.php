@@ -41,6 +41,7 @@ class ProjectController extends Controller
 
         $project->users()->attach(auth('sanctum')->id());
         $project->users()->attach($data['users']);
+        $project->teams()->attach($data['teams']);
 
         return response(['message' => 'Project created successfully'], 200);
     }
@@ -49,11 +50,11 @@ class ProjectController extends Controller
     {
         $this->authorize('project-edit', $project);
 
-            $request->validate($this->rules());
+        $request->validate($this->rules());
 
-            $project->update($request->all());
+        $project->update($this->rules());
 
-            return response(['message' => 'Project updated successfully'], 200);
+        return response(['message' => 'Project updated successfully'], 200);
     }
 
     public function show(Project $project)
@@ -95,6 +96,9 @@ class ProjectController extends Controller
     {
         return [
             'users' => ['nullable'],
+            'users.*.user_id' => ['exists:users,id'],
+            'teams' => ['nullable'],
+            'teams.*.team_id' => ['exists:teams,id'],
             'name' => ['required'],
             'company_id' => ['required', 'exists:companies,id'],
             'start_period' => ['required', 'date'],

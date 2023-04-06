@@ -31,4 +31,9 @@ class Project extends Model
         return $this->hasMany(UserProjectPermission::class, 'project_id', 'id');
     }
 
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class);
+    }
+
 }
