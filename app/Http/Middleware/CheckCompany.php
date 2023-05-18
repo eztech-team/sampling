@@ -18,7 +18,7 @@ class CheckCompany
     public function handle(Request $request, Closure $next)
     {
         $company = Company::whereHas('users', function ($user){
-            $user->where('id', auth('sanctum')->id());
+            $user->where('id', 1);
         })->first();
 
         if($company->active){

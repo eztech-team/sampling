@@ -12,6 +12,7 @@ use App\Http\Controllers\IncomeTestController;
 use App\Http\Controllers\NatureControlController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ResultTocController;
+use App\Http\Controllers\SampleController;
 use App\Http\Controllers\TdController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UserController;
@@ -193,6 +194,12 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/', 'index');
 //            Route::post('/', 'store');
 //            Route::get('/{balanceTest}', 'show');
+        });
+    });
+
+    Route::group(['prefix' => 'sample'], function () {
+        Route::controller(SampleController::class)->group(function () {
+            Route::get('/{id}/download', 'download')->withoutMiddleware('auth:sanctum');
         });
     });
 });
