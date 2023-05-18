@@ -13,9 +13,9 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class SampleController extends Controller
 {
     //td_method
-    //0 - Haphazard sampling (случайная выборка)
-    //1 - Monetary Unit Sampling (MUS)
-    //2 - hard
+    //1 - VALUE-WEIGHTED SELECTION
+    //2 - Monetary Unit Sampling (MUS)
+    //3 - Haphazard sampling (случайная выборка)
     /**
      * @throws Exception
      */
@@ -39,18 +39,18 @@ class SampleController extends Controller
 
         switch ($td->td_method) {
             case 1:
-                $excel = $this->haphazardSampling($td->id, $excels, $td->size);
+                $excel = $this->valueWeightedSelection($td->id, $excels, $td->size);
                 break;
             case 2:
                 $excel = $this->monetaryUnitSampling($td->id, $excels, $td->size);
                 break;
             case 3:
-                $excel = $this->valueWeightedSelection($td->id, $excels, $td->size);
+                $excel = $this->haphazardSampling($td->id, $excels, $td->size);
                 break;
             default:
                 return response(['message' => 'Not found TD'], 400);
         }
-        return response()->download($excel)->deleteFileAfterSend(true);
+        return response()->download($excel)->deleteFileAfterSend();
     }
 
     /**
@@ -59,33 +59,21 @@ class SampleController extends Controller
     private function haphazardSampling(int $td_id, array $excels, int $sample_size): string
     {
         $sample_rows = [];
-        // Цикл по файлам Excel
         foreach ($excels as $excel_file) {
-            // Создание объекта PhpSpreadsheet для чтения данных из файла
             $spreadsheet = IOFactory::load($excel_file['path']);
-
-            // Получение объекта первого листа
             $worksheet = $spreadsheet->getActiveSheet();
-
-            // Генерация случайных чисел для выборки
             $random_numbers = [];
             for ($i = 0; $i < $sample_size; $i++) {
-                $random_numbers[] = rand(2, $excel_file['amount_column']); // Начинаем с 2-й строки, так как первая строка содержит заголовки столбцов
+                $random_numbers[] = rand(2, $excel_file['amount_column']);
             }
-
-            // Получение случайных строк из листа
             foreach ($random_numbers as $random_number) {
                 $sample_rows[] = $worksheet->rangeToArray("A{$random_number}:K$random_number", null, true, true, true)[$random_number];
             }
         }
-        // Создание нового Excel-файла
         $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();
-
-        // Запись заголовков столбцов в первую строку
         $worksheet->fromArray(['Период', '№', 'Счет Дт', 'Количество Дт', 'Валюта Дт', 'Вал. сумма Дт', 'Счет Кт', 'Количество Кт', 'Валюта Кт', 'Вал. сумма Кт', 'Сумма']);
 
-        // Запись выбранных строк в файл
         $row_index = 2;
         foreach ($sample_rows as $row) {
             $worksheet->setCellValue("A{$row_index}", $row["A"])
@@ -102,10 +90,7 @@ class SampleController extends Controller
             $row_index++;
         }
 
-        $uniq = uniqid();
-        $path = "excels/$td_id-$uniq.xlsx";
-
-        // Сохранение файла
+        $path = "excels/$td_id-haphazard-sampling.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
         return $path;
@@ -113,54 +98,76 @@ class SampleController extends Controller
 
     private function monetaryUnitSampling(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): string
     {
-        $sample_rows = [];
+        $data = [];
+
         foreach ($excels as $excel_file) {
             $spreadsheet = IOFactory::load($excel_file['path']);
-
-            // Получение объекта первого листа
             $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
 
-            // Чтение данных из столбца с денежной стоимостью
-            $column_index = 'K'; // Здесь K - столбец суммы
-            $highest_row = $worksheet->getHighestRow();
-            $column_values = $worksheet->rangeToArray("{$column_index}2:{$column_index}{$highest_row}", null, true, true, true);
-
-            // Выборка строк на основе денежной стоимости
-            foreach ($column_values as $row_index => $row) {
-                $value = $row["K"]; // Здесь 1 - индекс столбца суммы
-                if ($value >= $minimum_value) {
-                    $sample_rows[] = $worksheet->rangeToArray("A{$row_index}:K{$row_index}", null, true, true, true)[$row_index];
-                }
+            foreach ($rows as $row) {
+                $data[] = [
+                    'period' => $row[0],      // A-период
+                    'number' => $row[1],      // B-номер
+                    'account_dt' => $row[2],  // C-Счет Дт
+                    'quantity_dt' => $row[3], // D-Количество Дт
+                    'currency_dt' => $row[4], // E-Валюта Дт
+                    'amount_dt' => $row[5],   // F-Вал. сумма Дт
+                    'account_kt' => $row[6],  // G-Счет Кт
+                    'quantity_kt' => $row[7], // H-Количество Кт
+                    'currency_kt' => $row[8], // I-Валюта Кт
+                    'amount_kt' => $row[9],   // J-Вал. сумма Кт
+                    'total' => $row[10],      // K-Сумма
+                ];
             }
         }
-
-// Создание нового Excel-файла
-        $spreadsheet = new Spreadsheet();
-        $worksheet = $spreadsheet->getActiveSheet();
-
-// Запись заголовков столбцов в первую строку
-        $worksheet->fromArray(['Period', 'Number', 'Account Dt', 'Amount Dt', 'Currency Dt', 'Currency Amount Dt', 'Account Kt', 'Amount Kt', 'Currency Kt', 'Currency Amount Kt', 'Sum']);
-
-// Запись выбранных строк в файл
-        $row_index = 2;
-        foreach ($sample_rows as $row) {
-            $worksheet->setCellValue("A{$row_index}", $row["A"])
-                ->setCellValue("B{$row_index}", $row["B"])
-                ->setCellValue("C{$row_index}", $row["C"])
-                ->setCellValue("D{$row_index}", $row["D"])
-                ->setCellValue("E{$row_index}", $row["E"])
-                ->setCellValue("F{$row_index}", $row["F"])
-                ->setCellValue("G{$row_index}", $row["G"])
-                ->setCellValue("H{$row_index}", $row["H"])
-                ->setCellValue("I{$row_index}", $row["I"])
-                ->setCellValue("J{$row_index}", $row["J"])
-                ->setCellValue("K{$row_index}", $row["K"]);
-            $row_index++;
+        $filteredData = [];
+        foreach ($data as $item) {
+            if (
+                $item['amount_dt'] >= $minimum_value &&
+                $item['amount_kt'] >= $minimum_value &&
+                $item['total'] >= $minimum_value
+            ) {
+                $filteredData[] = $item;
+            }
         }
-        $uniq = uniqid();
-        $path = "excels/$td_id-$uniq.xlsx";
+        if (count($filteredData) < $sample_size) {
+            $sample_size = count($filteredData);
+        }
+        $sample = array_slice($filteredData, 0, $sample_size);
 
-        // Сохранение файла
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A', 'Период');
+        $sheet->setCellValue('B', '№');
+        $sheet->setCellValue('C', 'Счет Дт');
+        $sheet->setCellValue('D', 'Количество Дт');
+        $sheet->setCellValue('E', 'Валюта Дт');
+        $sheet->setCellValue('F', 'Вал. сумма Дт');
+        $sheet->setCellValue('G', 'Счет Кт');
+        $sheet->setCellValue('H', 'Количество Кт');
+        $sheet->setCellValue('I', 'Валюта Кт');
+        $sheet->setCellValue('J', 'Вал. сумма Кт');
+        $sheet->setCellValue('K', 'Сумма');
+
+        $row = 2;
+        foreach ($sample as $item) {
+            $sheet->setCellValue('A' . $row, $item['period']);
+            $sheet->setCellValue('B' . $row, $item['number']);
+            $sheet->setCellValue('C' . $row, $item['account_dt']);
+            $sheet->setCellValue('D' . $row, $item['quantity_dt']);
+            $sheet->setCellValue('E' . $row, $item['currency_dt']);
+            $sheet->setCellValue('F' . $row, $item['amount_dt']);
+            $sheet->setCellValue('G' . $row, $item['account_kt']);
+            $sheet->setCellValue('H' . $row, $item['quantity_kt']);
+            $sheet->setCellValue('I' . $row, $item['currency_kt']);
+            $sheet->setCellValue('J' . $row, $item['amount_kt']);
+            $sheet->setCellValue('K' . $row, $item['total']);
+
+            $row++;
+        }
+        $path = "excels/$td_id-mus.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
         return $path;
@@ -168,82 +175,116 @@ class SampleController extends Controller
 
     private function valueWeightedSelection(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): string
     {
-// Столбец с весовыми значениями
-        $weight_column = 'L'; // Здесь L - столбец с весовыми значениями
+        $data = [];
 
-// Список выбранных строк
-        $sample_rows = [];
-
-// Цикл по файлам Excel
         foreach ($excels as $excel_file) {
-            // Создание объекта PhpSpreadsheet для чтения данных из файла
             $spreadsheet = IOFactory::load($excel_file['path']);
-
-            // Получение объекта первого листа
             $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
 
-            // Чтение данных из столбца с весовыми значениями
-            $highest_row = $worksheet->getHighestRow();
-            $weight_values = $worksheet->rangeToArray("{$weight_column}2:{$weight_column}{$highest_row}", null, true, true, true);
+            foreach ($rows as $row) {
+                $item = [
+                    'period' => $row[0],      // A-период
+                    'number' => $row[1],      // B-номер
+                    'account_dt' => $row[2],  // C-Счет Дт
+                    'quantity_dt' => $row[3], // D-Количество Дт
+                    'currency_dt' => $row[4], // E-Валюта Дт
+                    'amount_dt' => $row[5],   // F-Вал. сумма Дт
+                    'account_kt' => $row[6],  // G-Счет Кт
+                    'quantity_kt' => $row[7], // H-Количество Кт
+                    'currency_kt' => $row[8], // I-Валюта Кт
+                    'amount_kt' => $row[9],   // J-Вал. сумма Кт
+                    'total' => (int) str_replace(',', '', $row[10]),      // K-Сумма
+                ];
 
-            // Вычисление общей суммы весовых значений
-            $total_weight = 0;
-
-            foreach ($weight_values as $row) {
-                $value = $row["L"]; // Здесь 1 - индекс столбца с весовыми значениями
-                $total_weight += $value;
-            }
-
-            // Выборка строк на основе взвешенного значения
-            for ($i = 0; $i < $sample_size; $i++) {
-                $random_number = mt_rand(0, $total_weight);
-                $selected_row = null;
-
-                foreach ($weight_values as $row_index => $row) {
-                    $value = $row["L"]; // Здесь 1 - индекс столбца с весовыми значениями
-                    if ($random_number <= $value) {
-                        $selected_row = $worksheet->rangeToArray("A{$row_index}:K{$row_index}", null, true, true, true)[$row_index];
-                        break;
-                    } else {
-                        $random_number -= $value;
-                    }
-                }
-
-                if ($selected_row !== null) {
-                    $sample_rows[] = $selected_row;
+                if (
+                    $item['amount_dt'] >= $minimum_value &&
+                    $item['amount_kt'] >= $minimum_value &&
+                    $item['total'] >= $minimum_value
+                ) {
+                    $data[] = $item;
                 }
             }
         }
 
-// Создание нового Excel-файла
+        unset($data[0]);
+        // Шаг 1: Проверка, достаточно ли данных для формирования выборки
+        if (count($data) < $sample_size) {
+            $sample_size = count($data);
+        }
+
+        // Шаг 2: Формирование выборки на основе Value-Weighted Selection
+        $sample = [];
+
+        // Вычисление суммарной стоимости (веса) всех элементов данных
+        $totalValue = 0;
+
+        foreach ($data as $item) {
+            $totalValue += $item['total'];
+        }
+
+        // Вычисление веса каждого элемента данных
+        $weights = [];
+        foreach ($data as $item) {
+            $weight = $item['total'] / $totalValue;
+            $weights[] = $weight;
+        }
+
+        // Выборка элементов на основе весов
+        $randomIndexes = [];
+        while (count($randomIndexes) < $sample_size) {
+            $random = mt_rand() / mt_getrandmax(); // Генерация случайного числа от 0 до 1
+            $cumulativeWeight = 0;
+            for ($i = 0; $i < count($weights); $i++) {
+                $cumulativeWeight += $weights[$i];
+                if ($random <= $cumulativeWeight) {
+                    $randomIndexes[] = $i;
+                    break;
+                }
+            }
+        }
+
+        foreach ($randomIndexes as $index) {
+            $sample[] = $data[$index];
+        }
+
+        // Создание и сохранение Excel-файла
         $spreadsheet = new Spreadsheet();
-        $worksheet = $spreadsheet->getActiveSheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-// Запись заголовков столбцов в первую строку
-        $worksheet->fromArray(['Period', 'Number', 'Account Dt', 'Amount Dt', 'Currency Dt', 'Currency Amount Dt', 'Account Kt', 'Amount Kt', 'Currency Kt', 'Currency Amount Kt', 'Sum']);
+        $sheet->setCellValue('A1', 'Период');
+        $sheet->setCellValue('B1', '№');
+        $sheet->setCellValue('C1', 'Счет Дт');
+        $sheet->setCellValue('D1', 'Количество Дт');
+        $sheet->setCellValue('E1', 'Валюта Дт');
+        $sheet->setCellValue('F1', 'Вал. сумма Дт');
+        $sheet->setCellValue('G1', 'Счет Кт');
+        $sheet->setCellValue('H1', 'Количество Кт');
+        $sheet->setCellValue('I1', 'Валюта Кт');
+        $sheet->setCellValue('J1', 'Вал. сумма Кт');
+        $sheet->setCellValue('K1', 'Сумма');
 
-// Запись выбранных строк в файл
-        $row_index = 2;
-        foreach ($sample_rows as $row) {
-            $worksheet->setCellValue("A{$row_index}", $row["A"])
-                ->setCellValue("B{$row_index}", $row["B"])
-                ->setCellValue("C{$row_index}", $row["C"])
-                ->setCellValue("D{$row_index}", $row["D"])
-                ->setCellValue("E{$row_index}", $row["E"])
-                ->setCellValue("F{$row_index}", $row["F"])
-                ->setCellValue("G{$row_index}", $row["G"])
-                ->setCellValue("H{$row_index}", $row["H"])
-                ->setCellValue("I{$row_index}", $row["I"])
-                ->setCellValue("J{$row_index}", $row["J"])
-                ->setCellValue("K{$row_index}", $row["K"]);
-            $row_index++;
+        $row = 2;
+        foreach ($sample as $item) {
+            $sheet->setCellValue('A' . $row, $item['period']);
+            $sheet->setCellValue('B' . $row, $item['number']);
+            $sheet->setCellValue('C' . $row, $item['account_dt']);
+            $sheet->setCellValue('D' . $row, $item['quantity_dt']);
+            $sheet->setCellValue('E' . $row, $item['currency_dt']);
+            $sheet->setCellValue('F' . $row, $item['amount_dt']);
+            $sheet->setCellValue('G' . $row, $item['account_kt']);
+            $sheet->setCellValue('H' . $row, $item['quantity_kt']);
+            $sheet->setCellValue('I' . $row, $item['currency_kt']);
+            $sheet->setCellValue('J' . $row, $item['amount_kt']);
+            $sheet->setCellValue('K' . $row, $item['total']);
+
+            $row++;
         }
-        $uniq = uniqid();
-        $path = "excels/$td_id-$uniq.xlsx";
 
-        // Сохранение файла
+        $path = "excels/$td_id-vws.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
+
         return $path;
     }
 }
