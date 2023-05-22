@@ -50,13 +50,13 @@ class SampleController extends Controller
             default:
                 return response(['message' => 'Not found TD'], 400);
         }
-        return response()->download($excel)->deleteFileAfterSend();
+        return response($excel, 200);
     }
 
     /**
      * @throws Exception
      */
-    private function haphazardSampling(int $td_id, array $excels, int $sample_size): string
+    private function haphazardSampling(int $td_id, array $excels, int $sample_size): array
     {
         $sample_rows = [];
         foreach ($excels as $excel_file) {
@@ -93,10 +93,15 @@ class SampleController extends Controller
         $path = "excels/$td_id-haphazard-sampling.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
-        return $path;
+        $highestRow = (isset($worksheetv) ? $worksheet->getHighestRow() : ($sample_size + 1);
+
+        return [
+            'path' => $path,
+            'size' => $highestRow,
+        ];
     }
 
-    private function monetaryUnitSampling(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): string
+    private function monetaryUnitSampling(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): array
     {
         $data = [];
 
@@ -170,10 +175,15 @@ class SampleController extends Controller
         $path = "excels/$td_id-mus.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
-        return $path;
+        $highestRow = (isset($worksheetv) ? $worksheet->getHighestRow() : ($sample_size + 1);
+
+        return [
+            'path' => $path,
+            'size' => $highestRow,
+        ];
     }
 
-    private function valueWeightedSelection(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): string
+    private function valueWeightedSelection(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): array
     {
         $data = [];
 
@@ -235,7 +245,7 @@ class SampleController extends Controller
         while (count($randomIndexes) < $sample_size) {
             $random = mt_rand() / mt_getrandmax(); // Генерация случайного числа от 0 до 1
             $cumulativeWeight = 0;
-            for ($i = 0; $i < count($weights); $i++) {
+            for ($i = 1; $i < count($weights); $i++) {
                 $cumulativeWeight += $weights[$i];
                 if ($random <= $cumulativeWeight) {
                     $randomIndexes[] = $i;
@@ -243,9 +253,10 @@ class SampleController extends Controller
                 }
             }
         }
-
         foreach ($randomIndexes as $index) {
-            $sample[] = $data[$index];
+            if ($index > 0) {
+                $sample[] = $data[$index];
+            }
         }
 
         // Создание и сохранение Excel-файла
@@ -284,7 +295,11 @@ class SampleController extends Controller
         $path = "excels/$td_id-vws.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
+        $highestRow = (isset($worksheetv) ? $worksheet->getHighestRow() : ($sample_size + 1);
 
-        return $path;
+        return [
+            'path' => $path,
+            'size' => $highestRow,
+        ];
     }
 }
