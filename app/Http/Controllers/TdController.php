@@ -95,17 +95,21 @@ class TdController extends Controller
     {
         $data = $request->validate([
             'material_misstatement' => ['required', 'integer', 'max:2', 'min:0'],
-            'magnitude' => ['required', 'integer', 'max:2', 'min:0'],
-            'inherent_risk' => ['required', 'integer', 'max:2', 'min:0'],
+            'magnitude' => ['integer', 'max:2', 'min:0'],
+            'inherent_risk' => ['integer', 'max:2', 'min:0'],
             'control_risk' => ['required', 'integer', 'max:2', 'min:0'],
             'control_risc_comment' => ['nullable'],
             'auditor_confidence_level' => ['required', 'string'],
-            'misstatement_percentage' => ['required', 'string'],
+            'misstatement_percentage' => ['string'],
             'tocs' => ['nullable'],
             'ratio_expected_error' => ['required'],
             'ratio_expected_error_comment' => ['nullable'],
             'size' => ['required', 'integer'],
         ]);
+
+        $data['inherent_risk'] = $data['inherent_risk'] ?? 0;
+        $data['magnitude'] = $data['magnitude'] ?? 0;
+        $data['misstatement_percentage'] = $data['misstatement_percentage'] ?? 0;
 
         $td = Td::where('id', $request->id)->first();
 

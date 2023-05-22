@@ -33,7 +33,7 @@ class AggregateController extends Controller
         $this->authorize('aggregate-create');
 
         $request->validate([
-            'excel' => ['required', 'mimes:xls'],
+            'excel' => ['required', 'mimes:xls, xlsx'],
             'name' => ['required', 'max:255', 'unique:aggregates'],
             'amount_column' => ['nullable', 'integer'],
             'title' => ['required', 'boolean'],
