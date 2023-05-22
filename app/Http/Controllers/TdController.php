@@ -94,10 +94,10 @@ class TdController extends Controller
     public function storeMatrix(Request $request)
     {
         $data = $request->validate([
-            'material_misstatement' => ['required', 'integer', 'max:2', 'min:0'],
-            'magnitude' => ['integer', 'max:2', 'min:0'],
-            'inherent_risk' => ['integer', 'max:2', 'min:0'],
-            'control_risk' => ['required', 'integer', 'max:2', 'min:0'],
+            'material_misstatement' => ['required', 'integer'],
+            'magnitude' => ['integer'],
+            'inherent_risk' => ['integer'],
+            'control_risk' => ['required', 'integer'],
             'control_risc_comment' => ['nullable'],
             'auditor_confidence_level' => ['required', 'string'],
             'misstatement_percentage' => ['string'],
