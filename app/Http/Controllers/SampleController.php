@@ -93,7 +93,7 @@ class SampleController extends Controller
         $path = "excels/$td_id-haphazard-sampling.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
-        $highestRow = (isset($worksheetv) ? $worksheet->getHighestRow() : ($sample_size + 1);
+        $highestRow = $sample_size + 1;
 
         return [
             'path' => $path,
@@ -175,7 +175,7 @@ class SampleController extends Controller
         $path = "excels/$td_id-mus.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
-        $highestRow = (isset($worksheetv) ? $worksheet->getHighestRow() : ($sample_size + 1);
+        $highestRow = $sample_size + 1;
 
         return [
             'path' => $path,
@@ -295,7 +295,7 @@ class SampleController extends Controller
         $path = "excels/$td_id-vws.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
-        $highestRow = (isset($worksheetv) ? $worksheet->getHighestRow() : ($sample_size + 1);
+        $highestRow = $sample_size + 1;
 
         return [
             'path' => $path,
