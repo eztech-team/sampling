@@ -105,6 +105,7 @@ class TdController extends Controller
             'ratio_expected_error' => ['required'],
             'ratio_expected_error_comment' => ['nullable'],
             'size' => ['required', 'integer'],
+            'size_comment' => ['string']
         ]);
 
         $data['inherent_risk'] = $data['inherent_risk'] ?? 0;
@@ -182,6 +183,7 @@ class TdController extends Controller
                     'inherent_risk',
                     'auditor_confidence_level',
                     'misstatement_percentage',
+                    'size_comment'
                 )
                 ->first();
 

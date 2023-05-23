@@ -50,6 +50,7 @@ class SampleController extends Controller
             default:
                 return response(['message' => 'Not found TD'], 400);
         }
+        $excel['path'] = env('APP_URL') . '/'. $excel['path'];
         return response($excel, 200);
     }
 

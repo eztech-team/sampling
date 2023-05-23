@@ -49,6 +49,7 @@ class Td extends Model
         'inherent_risk',
         'auditor_confidence_level',
         'misstatement_percentage',
+        'size_comment'
     ];
 
     protected $casts = [
