@@ -12,6 +12,8 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SampleController extends Controller
 {
+    const BASE_PATH = 'excels/sample/';
+
     //td_method
     //1 - VALUE-WEIGHTED SELECTION
     //2 - Monetary Unit Sampling (MUS)
@@ -39,18 +41,39 @@ class SampleController extends Controller
 
         switch ($td->td_method) {
             case 1:
-                $excel = $this->valueWeightedSelection($td->id, $excels, $td->size);
+                if (file_exists(self::BASE_PATH . "$td->id-vws.xlsx")) {
+                    $excel = [
+                        'path' => self::BASE_PATH . "$td->id-vws.xlsx",
+                        'size' => $td->size + 1,
+                    ];
+                } else {
+                    $excel = $this->valueWeightedSelection($td->id, $excels, $td->size);
+                }
                 break;
             case 2:
-                $excel = $this->monetaryUnitSampling($td->id, $excels, $td->size);
+                if (file_exists(self::BASE_PATH . "$td->id-mus.xlsx")) {
+                    $excel = [
+                        'path' => self::BASE_PATH . "$td->id-mus.xlsx",
+                        'size' => $td->size + 1,
+                    ];
+                } else {
+                    $excel = $this->monetaryUnitSampling($td->id, $excels, $td->size);
+                }
                 break;
             case 3:
-                $excel = $this->haphazardSampling($td->id, $excels, $td->size);
+                if (file_exists(self::BASE_PATH . "$td->id-haphazard-sampling.xlsx")) {
+                    $excel = [
+                        'path' => self::BASE_PATH . "$td->id-haphazard-sampling.xlsx",
+                        'size' => $td->size + 1,
+                    ];
+                } else {
+                    $excel = $this->haphazardSampling($td->id, $excels, $td->size);
+                }
                 break;
             default:
                 return response(['message' => 'Not found TD'], 400);
         }
-        $excel['path'] = env('APP_URL') . '/'. $excel['path'];
+        $excel['path'] = env('APP_URL') . '/' . $excel['path'];
         return response($excel, 200);
     }
 
@@ -68,7 +91,7 @@ class SampleController extends Controller
                 $random_numbers[] = rand(2, $excel_file['amount_column']);
             }
             foreach ($random_numbers as $random_number) {
-                $sample_rows[] = $worksheet->rangeToArray("A{$random_number}:K$random_number", null, true, true, true)[$random_number];
+                $sample_rows[] = $worksheet->rangeToArray("A$random_number:K$random_number", null, true, true, true)[$random_number];
             }
         }
         $spreadsheet = new Spreadsheet();
@@ -77,21 +100,21 @@ class SampleController extends Controller
 
         $row_index = 2;
         foreach ($sample_rows as $row) {
-            $worksheet->setCellValue("A{$row_index}", $row["A"])
-                ->setCellValue("B{$row_index}", $row["B"])
-                ->setCellValue("C{$row_index}", $row["C"])
-                ->setCellValue("D{$row_index}", $row["D"])
-                ->setCellValue("E{$row_index}", $row["E"])
-                ->setCellValue("F{$row_index}", $row["F"])
-                ->setCellValue("G{$row_index}", $row["G"])
-                ->setCellValue("H{$row_index}", $row["H"])
-                ->setCellValue("I{$row_index}", $row["I"])
-                ->setCellValue("J{$row_index}", $row["J"])
-                ->setCellValue("K{$row_index}", $row["K"]);
+            $worksheet->setCellValue("A$row_index", $row["A"])
+                ->setCellValue("B$row_index", $row["B"])
+                ->setCellValue("C$row_index", $row["C"])
+                ->setCellValue("D$row_index", $row["D"])
+                ->setCellValue("E$row_index", $row["E"])
+                ->setCellValue("F$row_index", $row["F"])
+                ->setCellValue("G$row_index", $row["G"])
+                ->setCellValue("H$row_index", $row["H"])
+                ->setCellValue("I$row_index", $row["I"])
+                ->setCellValue("J$row_index", $row["J"])
+                ->setCellValue("K$row_index", $row["K"]);
             $row_index++;
         }
 
-        $path = "excels/$td_id-haphazard-sampling.xlsx";
+        $path = self::BASE_PATH . "$td_id-haphazard-sampling.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
         $highestRow = $sample_size + 1;
@@ -157,6 +180,7 @@ class SampleController extends Controller
         $sheet->setCellValue('J', 'Вал. сумма Кт');
         $sheet->setCellValue('K', 'Сумма');
 
+
         $row = 2;
         foreach ($sample as $item) {
             $sheet->setCellValue('A' . $row, $item['period']);
@@ -173,7 +197,7 @@ class SampleController extends Controller
 
             $row++;
         }
-        $path = "excels/$td_id-mus.xlsx";
+        $path = self::BASE_PATH . "$td_id-mus.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
         $highestRow = $sample_size + 1;
@@ -205,7 +229,7 @@ class SampleController extends Controller
                     'quantity_kt' => $row[7], // H-Количество Кт
                     'currency_kt' => $row[8], // I-Валюта Кт
                     'amount_kt' => $row[9],   // J-Вал. сумма Кт
-                    'total' => (int) str_replace(',', '', $row[10]),      // K-Сумма
+                    'total' => (int)str_replace(',', '', $row[10]),      // K-Сумма
                 ];
 
                 if (
@@ -293,7 +317,7 @@ class SampleController extends Controller
             $row++;
         }
 
-        $path = "excels/$td_id-vws.xlsx";
+        $path = self::BASE_PATH . "$td_id-vws.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
         $highestRow = $sample_size + 1;
