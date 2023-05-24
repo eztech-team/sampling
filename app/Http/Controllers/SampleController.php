@@ -396,7 +396,9 @@ class SampleController extends Controller
     {
         $data = $request->validate([
             'misstatement_method' => ['required', 'integer', 'max:3', 'min:1'],
-            'total_error' => ['integer']
+            'comment'     => ['string'],
+            'link'        => ['string'],
+            'total_error' => ['integer', 'required']
         ]);
         $td = Td::query()
             ->where('id', $td_id)
@@ -405,21 +407,27 @@ class SampleController extends Controller
 
         switch ($data['misstatement_method']) {
             case 1:
-                $data = $request->validate([
-                    'total_error' => ['required']
-                ]);
                 $misstatement = $this->misstatementRatio($data['total_error'], $sample_data['total_sample'], $sample_data['total_population']);
                 break;
             case 2:
-                $data = $request->validate([
-                    'total_error' => ['required']
-                ]);
                 $misstatement = $this->averageMisstatement($data['total_error'], $sample_data['count_sample'], $sample_data['count_population']);
                 break;
             case 3:
                 $misstatement = $this->intervalMisstatementRate($sample_data['total_population'], $td->size);
                 break;
         }
+
+        Td::query()
+            ->where('id', $td_id)
+            ->update(
+                [
+                    'misstatement' => [
+                        'misstatement' => $misstatement,
+                        'comment' => $data['comment'] ?? null,
+                        'link' => $data['link'] ?? null,
+                    ]
+                ]
+            );
         return response(['misstatement' => $misstatement]);
     }
 

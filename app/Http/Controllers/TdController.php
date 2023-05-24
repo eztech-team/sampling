@@ -183,7 +183,8 @@ class TdController extends Controller
                     'inherent_risk',
                     'auditor_confidence_level',
                     'misstatement_percentage',
-                    'size_comment'
+                    'size_comment',
+                    'misstatement'
                 )
                 ->first();
 
@@ -207,7 +208,9 @@ class TdController extends Controller
                     'income_test_name', IncomeTest::find($tdMatrix->income_test_id)->name
                 );
             }
-
+            if ($tdMatrix->misstatement) {
+                $tdMatrix->misstatement = json_decode($tdMatrix->misstatement);
+            }
             return response($tdMatrix, 200);
         }catch (\Exception $e){
             return response(['message' => 'Not found TDs matrix'], 400);

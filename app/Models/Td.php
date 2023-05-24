@@ -50,7 +50,8 @@ class Td extends Model
         'auditor_confidence_level',
         'misstatement_percentage',
         'size_comment',
-        'sample_data'
+        'sample_data',
+        'misstatement'
     ];
 
     protected $casts = [
