@@ -200,6 +200,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
     Route::group(['prefix' => 'sample'], function () {
         Route::controller(SampleController::class)->group(function () {
             Route::get('/{id}/download', 'download')->withoutMiddleware('auth:sanctum');
+            Route::post('/{id}/misstatement', 'calculateMisstatement')->withoutMiddleware('auth:sanctum');
         });
     });
 });

@@ -9,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Http\Request;
 
 class SampleController extends Controller
 {
@@ -38,37 +39,36 @@ class SampleController extends Controller
                 'amount_column' => $aggregate->amount_column
             ];
         }
-
         switch ($td->td_method) {
             case 1:
-                if (file_exists(self::BASE_PATH . "$td->id-vws.xlsx")) {
-                    $excel = [
-                        'path' => self::BASE_PATH . "$td->id-vws.xlsx",
-                        'size' => $td->size + 1,
-                    ];
-                } else {
+//                if (file_exists(self::BASE_PATH . "$td->id-vws.xlsx")) {
+//                    $excel = [
+//                        'path' => self::BASE_PATH . "$td->id-vws.xlsx",
+//                        'size' => $td->size + 1,
+//                    ];
+//                } else {
                     $excel = $this->valueWeightedSelection($td->id, $excels, $td->size);
-                }
+//                }
                 break;
             case 2:
-                if (file_exists(self::BASE_PATH . "$td->id-mus.xlsx")) {
-                    $excel = [
-                        'path' => self::BASE_PATH . "$td->id-mus.xlsx",
-                        'size' => $td->size + 1,
-                    ];
-                } else {
+//                if (file_exists(self::BASE_PATH . "$td->id-mus.xlsx")) {
+//                    $excel = [
+//                        'path' => self::BASE_PATH . "$td->id-mus.xlsx",
+//                        'size' => $td->size + 1,
+//                    ];
+//                } else {
                     $excel = $this->monetaryUnitSampling($td->id, $excels, $td->size);
-                }
+//                }
                 break;
             case 3:
-                if (file_exists(self::BASE_PATH . "$td->id-haphazard-sampling.xlsx")) {
-                    $excel = [
-                        'path' => self::BASE_PATH . "$td->id-haphazard-sampling.xlsx",
-                        'size' => $td->size + 1,
-                    ];
-                } else {
+//                if (file_exists(self::BASE_PATH . "$td->id-haphazard-sampling.xlsx")) {
+//                    $excel = [
+//                        'path' => self::BASE_PATH . "$td->id-haphazard-sampling.xlsx",
+//                        'size' => $td->size + 1,
+//                    ];
+//                } else {
                     $excel = $this->haphazardSampling($td->id, $excels, $td->size);
-                }
+//                }
                 break;
             default:
                 return response(['message' => 'Not found TD'], 400);
@@ -83,9 +83,20 @@ class SampleController extends Controller
     private function haphazardSampling(int $td_id, array $excels, int $sample_size): array
     {
         $sample_rows = [];
+        $total_population = 0; //total_population - общая сумма всех excel файлов
+        $count_population = 0; //count_population - количество строк в excel файлах
+        $count_sample     = 0; //count_sample - длинна итогового excel файла
+        $total_sample     = 0; //total_sample - общая цена итого excel файла
+
         foreach ($excels as $excel_file) {
             $spreadsheet = IOFactory::load($excel_file['path']);
             $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+            unset($rows[0]);
+            foreach ($rows as $row) {
+                $total_population += (int)(int)str_replace(',', '', $row[10]);
+                $count_population += 1;
+            }
             $random_numbers = [];
             for ($i = 0; $i < $sample_size; $i++) {
                 $random_numbers[] = rand(2, $excel_file['amount_column']);
@@ -100,6 +111,8 @@ class SampleController extends Controller
 
         $row_index = 2;
         foreach ($sample_rows as $row) {
+            $count_sample     += 1;
+            $total_sample     += (int)str_replace(',', '', $row['K']);
             $worksheet->setCellValue("A$row_index", $row["A"])
                 ->setCellValue("B$row_index", $row["B"])
                 ->setCellValue("C$row_index", $row["C"])
@@ -118,6 +131,18 @@ class SampleController extends Controller
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
         $highestRow = $sample_size + 1;
+        Td::query()
+            ->where('id', $td_id)
+            ->update(
+                [
+                    'sample_data' => [
+                        'total_population' => $total_population,
+                        'count_population' => $count_population,
+                        'count_sample'     => $count_sample,
+                        'total_sample'     => $total_sample,
+                    ]
+                ]
+            );
 
         return [
             'path' => $path,
@@ -128,13 +153,19 @@ class SampleController extends Controller
     private function monetaryUnitSampling(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): array
     {
         $data = [];
+        $total_population = 0; //total_population - общая сумма всех excel файлов
+        $count_population = 0; //count_population - количество строк в excel файлах
+        $count_sample     = 0; //count_sample - длинна итогового excel файла
+        $total_sample     = 0; //total_sample - общая цена итого excel файла
 
         foreach ($excels as $excel_file) {
             $spreadsheet = IOFactory::load($excel_file['path']);
             $worksheet = $spreadsheet->getActiveSheet();
             $rows = $worksheet->toArray();
-
+            unset($rows[0]);
             foreach ($rows as $row) {
+                $total_population += (int) $row[10];
+                $count_population += 1;
                 $data[] = [
                     'period' => $row[0],      // A-период
                     'number' => $row[1],      // B-номер
@@ -150,6 +181,7 @@ class SampleController extends Controller
                 ];
             }
         }
+
         $filteredData = [];
         foreach ($data as $item) {
             if (
@@ -165,24 +197,25 @@ class SampleController extends Controller
         }
         $sample = array_slice($filteredData, 0, $sample_size);
 
+        // Создание и сохранение Excel-файла
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A', 'Период');
-        $sheet->setCellValue('B', '№');
-        $sheet->setCellValue('C', 'Счет Дт');
-        $sheet->setCellValue('D', 'Количество Дт');
-        $sheet->setCellValue('E', 'Валюта Дт');
-        $sheet->setCellValue('F', 'Вал. сумма Дт');
-        $sheet->setCellValue('G', 'Счет Кт');
-        $sheet->setCellValue('H', 'Количество Кт');
-        $sheet->setCellValue('I', 'Валюта Кт');
-        $sheet->setCellValue('J', 'Вал. сумма Кт');
-        $sheet->setCellValue('K', 'Сумма');
-
-
+        $sheet->setCellValue('A1', 'Период');
+        $sheet->setCellValue('B1', '№');
+        $sheet->setCellValue('C1', 'Счет Дт');
+        $sheet->setCellValue('D1', 'Количество Дт');
+        $sheet->setCellValue('E1', 'Валюта Дт');
+        $sheet->setCellValue('F1', 'Вал. сумма Дт');
+        $sheet->setCellValue('G1', 'Счет Кт');
+        $sheet->setCellValue('H1', 'Количество Кт');
+        $sheet->setCellValue('I1', 'Валюта Кт');
+        $sheet->setCellValue('J1', 'Вал. сумма Кт');
+        $sheet->setCellValue('K1', 'Сумма');
         $row = 2;
         foreach ($sample as $item) {
+            $count_sample     += 1;
+            $total_sample     += (int)str_replace(',', '', $item['total']);
             $sheet->setCellValue('A' . $row, $item['period']);
             $sheet->setCellValue('B' . $row, $item['number']);
             $sheet->setCellValue('C' . $row, $item['account_dt']);
@@ -201,7 +234,18 @@ class SampleController extends Controller
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
         $highestRow = $sample_size + 1;
-
+        Td::query()
+            ->where('id', $td_id)
+            ->update(
+                [
+                    'sample_data' => [
+                        'total_population' => $total_population,
+                        'count_population' => $count_population,
+                        'count_sample'     => $count_sample,
+                        'total_sample'     => $total_sample,
+                    ]
+                ]
+            );
         return [
             'path' => $path,
             'size' => $highestRow,
@@ -211,13 +255,19 @@ class SampleController extends Controller
     private function valueWeightedSelection(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): array
     {
         $data = [];
+        $total_population = 0; //total_population - общая сумма всех excel файлов
+        $count_population = 0; //count_population - количество строк в excel файлах
+        $count_sample     = 0; //count_sample - длинна итогового excel файла
+        $total_sample     = 0; //total_sample - общая цена итого excel файла
 
         foreach ($excels as $excel_file) {
             $spreadsheet = IOFactory::load($excel_file['path']);
             $worksheet = $spreadsheet->getActiveSheet();
             $rows = $worksheet->toArray();
-
+            unset($rows[0]);
             foreach ($rows as $row) {
+                $total_population += (int)str_replace(',', '', $row[10]);
+                $count_population += 1;
                 $item = [
                     'period' => $row[0],      // A-период
                     'number' => $row[1],      // B-номер
@@ -302,6 +352,8 @@ class SampleController extends Controller
 
         $row = 2;
         foreach ($sample as $item) {
+            $count_sample     += 1;
+            $total_sample     += $item['total'];
             $sheet->setCellValue('A' . $row, $item['period']);
             $sheet->setCellValue('B' . $row, $item['number']);
             $sheet->setCellValue('C' . $row, $item['account_dt']);
@@ -322,9 +374,69 @@ class SampleController extends Controller
         $writer->save($path);
         $highestRow = $sample_size + 1;
 
+        Td::query()
+            ->where('id', $td_id)
+            ->update(
+                [
+                    'sample_data' => [
+                        'total_population' => $total_population,
+                        'count_population' => $count_population,
+                        'count_sample'     => $count_sample,
+                        'total_sample'     => $total_sample,
+                    ]
+                ]
+            );
+
         return [
             'path' => $path,
             'size' => $highestRow,
         ];
+    }
+    public function calculateMisstatement(Request $request, int $td_id)
+    {
+        $data = $request->validate([
+            'misstatement_method' => ['required', 'integer', 'max:3', 'min:1'],
+            'total_error' => ['integer']
+        ]);
+        $td = Td::query()
+            ->where('id', $td_id)
+            ->first();
+        $sample_data = json_decode($td->sample_data, true);
+
+        switch ($data['misstatement_method']) {
+            case 1:
+                $data = $request->validate([
+                    'total_error' => ['required']
+                ]);
+                $misstatement = $this->misstatementRatio($data['total_error'], $sample_data['total_sample'], $sample_data['total_population']);
+                break;
+            case 2:
+                $data = $request->validate([
+                    'total_error' => ['required']
+                ]);
+                $misstatement = $this->averageMisstatement($data['total_error'], $sample_data['count_sample'], $sample_data['count_population']);
+                break;
+            case 3:
+                $misstatement = $this->intervalMisstatementRate($sample_data['total_population'], $td->size);
+                break;
+        }
+        return response(['misstatement' => $misstatement]);
+    }
+
+    private function misstatementRatio(int $total_error, int $total_sample, int $total_population): int
+    {
+        $misstatement_rate = $total_error/$total_sample;
+        return $total_population * $misstatement_rate;
+    }
+
+    private function averageMisstatement(int $total_error, int $count_sample, int $count_population): int
+    {
+        $average_misstatement = $total_error/$count_sample;
+        return $average_misstatement*$count_population;
+    }
+    private function intervalMisstatementRate(int $total_population, int $td_size): int
+    {
+        $interval = $total_population/$td_size;
+        return ($td_size/$td_size * $interval) + ((2 * $interval)/($interval * 2));
     }
 }
