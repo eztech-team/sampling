@@ -41,9 +41,20 @@ Route::post('company/accept', function (){
     $companyID = request()->company_id;
     $company = Company::find($companyID);
     $company->active = true;
+    $company->moderation_at = new \DateTime();
     $company->save();
 
-    return response('OK', 200);
+    return response(['message' => 'Success'], 200);
+});
+
+Route::post('company/reject', function (){
+    $companyID = request()->company_id;
+    $company = Company::find($companyID);
+    $company->active = false;
+    $company->moderation_at = new \DateTime();
+    $company->save();
+
+    return response(['message' => 'Success'], 200);
 });
 
 Route::controller(AuthController::class)->group(function(){
@@ -59,7 +70,9 @@ Route::controller(VerifyEmailController::class)->group(function (){
 
 Route::prefix('companies')->group(function (){
     Route::post('create-user', [UserController::class, 'createUser']);
-
+    Route::get('', [CompanyController::class, 'index']);
+    Route::get('/show/{id}', [CompanyController::class, 'showCompany']);
+    Route::get('/request', [CompanyController::class, 'requestList']);
     Route::controller(UserController::class)
         ->middleware('auth:sanctum')
         ->group(function (){

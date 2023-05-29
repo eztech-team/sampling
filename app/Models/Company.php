@@ -14,6 +14,7 @@ class Company extends Model
         'user_id',
         'name',
         'active',
+        'moderation_at'
     ];
 
     public function users(): BelongsToMany
