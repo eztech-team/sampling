@@ -66,6 +66,7 @@ Route::prefix('companies')->group(function (){
             Route::post('send-notification', 'sendNotification');
             Route::get('users', 'users');
             Route::get('users/role', 'usersByRole');
+            Route::put( 'users/{user_id}', 'updateUser');
             Route::post('add-project-team', 'addUserToProjectsAndTeam');
     });
 });

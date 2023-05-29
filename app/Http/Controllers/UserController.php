@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -160,5 +161,35 @@ class UserController extends Controller
         }
 
         return $users;
+    }
+
+    public function userList()
+    {
+        $users = User::query()
+            ->select('id', 'name', 'surname', 'email', 'role_id')
+            ->get();
+
+        return response($users, 200);
+    }
+
+    public function updateUser(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'name' => ['nullable', 'max:255'],
+            'surname' => ['nullable', 'max:255'],
+            'password' => ['nullable', 'max:20'],
+            'repeat_password' => ['nullable', 'same:password'],
+        ]);
+
+        if ($user = User::query()->where('id', $id)->first()) {
+            if ($data['password'] && $data['password'] != $data['repeat_password']) {
+                return response(['message' => 'passwords dont match'], 400);
+            } else {
+                $data['password'] = Hash::make($data['password']);
+            }
+            $user->update($data);
+            return response(['message' => 'Success'], 200);
+        }
+        return response(['message' => 'User not found'], 404);
     }
 }
