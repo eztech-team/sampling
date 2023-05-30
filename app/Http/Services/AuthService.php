@@ -46,7 +46,8 @@ class AuthService
 
         return [
             'status' => true,
-            'token' => request()->user()->createToken(\Str::random(10))->plainTextToken
+            'token' => request()->user()->createToken(\Str::random(10))->plainTextToken,
+            'role_id' => request()->user()->role_id
         ];
     }
 

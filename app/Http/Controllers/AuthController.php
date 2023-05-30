@@ -42,7 +42,7 @@ class AuthController extends Controller
         ]);
         $service = $this->service->login($data);
         if($service['status']){
-            return response(['token' => $service['token']], 200);
+            return response(['token' => $service['token'] , 'role_id' => $service['role_id']], 200);
         }
 
         return response(['message' => 'Unauthorized'], 400);
