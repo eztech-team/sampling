@@ -125,6 +125,12 @@ class CompanyController extends Controller
             $company->city_name    = $city->name;
             $company->members_count = $members_count;
             $company->email = $user->email;
+            $company->user = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'surname' => $user->surname
+            ];
+            unset($company->user_id);
         }
 
         return response($companies, 200);
