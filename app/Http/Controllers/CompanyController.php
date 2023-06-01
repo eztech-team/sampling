@@ -37,6 +37,10 @@ class CompanyController extends Controller
             $companies = $companies
                 ->where('active', '=', $request->is_accept);
         }
+        if ($request->filter) {
+            $companies = $companies
+                ->where('name', 'ilike', "%$request->filter%");
+        }
         $companies = $companies->paginate();
 
         foreach ($companies as $company) {
