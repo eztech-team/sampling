@@ -88,6 +88,8 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
     Route::group(['prefix' => 'companies'], function (){
         Route::controller(CompanyController::class)->group(function (){
             Route::post('/', 'show');
+            Route::get('/list/download', 'excel')->withoutMiddleware('auth:sanctum');
+            Route::delete('/{id}', 'delete');
         });
     });
     /*
