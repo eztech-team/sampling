@@ -156,6 +156,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
         Route::controller(BalanceTestController::class)->group(function (){
             Route::get('/{project_id}', 'index');
             Route::post('/', 'store');
+            Route::put('/{balanceTest}', 'update');
             Route::get('/show/{balanceTest}', 'show');
             Route::delete('/{balanceTest}', 'destroy');
             Route::get('/show/excel/{balanceTest}', 'excel');
@@ -172,6 +173,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
         Route::controller(IncomeTestController::class)->group(function (){
             Route::get('/{project_id}', 'index');
             Route::post('/', 'store');
+            Route::put('/{incomeTest}', 'update');
             Route::get('/show/{incomeTest}', 'show');
             Route::delete('/{incomeTest}', 'destroy');
             Route::get('/show/excel/{incomeTest}', 'excel');

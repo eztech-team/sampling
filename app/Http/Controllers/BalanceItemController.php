@@ -73,18 +73,17 @@ class BalanceItemController extends Controller
     {
         $this->authorize('item-edit', $balanceItem);
 
-        $request->validate([
-            'name' => ['required', 'max:255'],
-            'description' => ['nullable', 'max:255'],
-            'array_table' => ['required', 'between:6,6', 'array'],
-            'project_id' => ['required', 'exists:projects,id'],
-        ]);
-
-        $balanceItem->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'array_table' => $request->array_table,
-        ]);
+        $update_data = [];
+        if ($request->name) {
+            $update_data['name'] = $request->name;
+        }
+        if ($request->description) {
+            $update_data['description'] = $request->description;
+        }
+        if ($request->array_table) {
+            $update_data['array_table'] = $request->array_table;
+        }
+        $balanceItem->update($update_data);
 
         return response(['message' => 'Success'], 200);
     }

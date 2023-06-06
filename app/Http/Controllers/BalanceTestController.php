@@ -28,7 +28,13 @@ class BalanceTestController extends Controller
         $balanceItem = BalanceItem::where('project_id', request()->project_id)
             ->with('tests')
             ->get();
-
+        foreach ($balanceItem as $item) {
+            foreach ($item->tests as $test) {
+                if (!is_null($test->faq)) {
+                    $test->faq = json_decode($test->faq);
+                }
+            }
+        }
         return response($balanceItem, 200);
     }
 
@@ -54,9 +60,9 @@ class BalanceTestController extends Controller
                 'nature_control_id' => ['required', 'exists:nature_controls,id'],
                 'balance_item_id' => ['required', 'exists:balance_items,id'],
                 'method' => ['required', 'boolean'],
-                'first_comment' => ['nullable', 'max:255']
+                'first_comment' => ['nullable', 'max:255'],
+                'faq'  => ['nullable']
             ]);
-
             $balanceTest = BalanceTest::create([
                 'name' => $request->name,
                 'first_size' => $request->size,
@@ -67,7 +73,8 @@ class BalanceTestController extends Controller
                 'nature_control_id' => $request->nature_control_id,
                 'balance_item_id' => $request->balance_item_id,
                 'method' => $request->method,
-                'first_comment' => $request->first_comment
+                'first_comment' => $request->first_comment,
+                'faq'   => is_null($request->faq) ? null : json_encode($request->faq)
             ]);
 
             if($balanceTest->first_size){
@@ -96,7 +103,7 @@ class BalanceTestController extends Controller
                 'second_comment' => ['nullable', 'max:255'],
                 'nature_control_id' => [
                     'exists:nature_controls,id',
-                    new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)]
+                    new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)],
             ]);
             $balanceTest->update([
                 'second_size' => $request->size,
@@ -126,6 +133,19 @@ class BalanceTestController extends Controller
         return response(['message' => 'Success', 'balance_test_id' => $balanceTest->id], 200);
     }
 
+    public function update(BalanceTest $balanceTest, Request $request)
+    {
+        $request->validate([
+            'array_table' => ['required'],
+        ]);
+
+        $balanceTest->update(
+            [
+                'array_table' => $request->array_table
+            ]);
+        return response(['message' => 'Success'], 200);
+    }
+
     /**
      * Display the specified resource.
      *
@@ -149,9 +169,12 @@ class BalanceTestController extends Controller
                 'method',
                 'first_comment',
                 'second_comment',
+                'faq'
             )
             ->with(['aggregate', 'natureControl'])->first();
-
+        if (!is_null($balanceTest->faq)) {
+            $balanceTest->faq = json_decode($balanceTest->faq);
+        }
         return response($balanceTest,200);
     }
 

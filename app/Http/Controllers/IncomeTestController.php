@@ -23,7 +23,13 @@ class IncomeTestController extends Controller
         $balanceItem = IncomeItem::where('project_id', request()->project_id)
             ->with('tests')
             ->get();
-
+        foreach ($balanceItem as $item) {
+            foreach ($item->tests as $test) {
+                if (!is_null($test->faq)) {
+                    $test->faq = json_decode($test->faq);
+                }
+            }
+        }
         return response($balanceItem, 200);
     }
 
@@ -44,6 +50,7 @@ class IncomeTestController extends Controller
                 'income_item_id' => ['required', 'exists:income_items,id'],
                 'method' => ['required', 'boolean'],
                 'first_comment' => ['nullable', 'max:255'],
+                'faq'  => ['nullable']
             ]);
 
             $incomeTest = IncomeTest::create([
@@ -56,7 +63,8 @@ class IncomeTestController extends Controller
                 'nature_control_id' => $request->nature_control_id,
                 'income_item_id' => $request->income_item_id,
                 'method' => $request->method,
-                'first_comment' => $request->first_comment
+                'first_comment' => $request->first_comment,
+                'faq'   => is_null($request->faq) ? null : json_encode($request->faq)
             ]);
 
             if($incomeTest->first_size){
@@ -133,8 +141,13 @@ class IncomeTestController extends Controller
                 'method',
                 'first_comment',
                 'second_comment',
+                'faq'
             )
             ->with(['aggregate', 'natureControl'])->first();
+
+        if (!is_null($incomeTest->faq)) {
+            $incomeTest->faq = json_decode($incomeTest->faq);
+        }
 
         return response($incomeTest,200);
     }
