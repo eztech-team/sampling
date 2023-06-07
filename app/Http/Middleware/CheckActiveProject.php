@@ -23,10 +23,13 @@ class CheckActiveProject
 
     public function handle(Request $request, Closure $next)
     {
-        $project = Project::find($request->project_id);
-
-        if($project->active){
-           return response('Bad Request', 400);
+        if ($request->balanceItem) {
+            $project = Project::query()->where('id', '=', $request->balanceItem->project_id)->first();
+        }  else {
+            $project = Project::query()->where('id', '=', $request->project_id)->first();
+        }
+        if(is_null($project) || $project->active){
+           return response(['message' => 'Bad Request'], 400);
         }
 
         return $next($request);

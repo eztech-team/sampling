@@ -173,7 +173,6 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
         Route::controller(IncomeTestController::class)->group(function (){
             Route::get('/{project_id}', 'index');
             Route::post('/', 'store');
-            Route::put('/{incomeTest}', 'update');
             Route::get('/show/{incomeTest}', 'show');
             Route::delete('/{incomeTest}', 'destroy');
             Route::get('/show/excel/{incomeTest}', 'excel');
@@ -198,6 +197,7 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/income', 'incomeTd');
             Route::post('/', 'store');
             Route::get('/{id}', 'show');
+            Route::put('/{id}', 'update');
             Route::post('/{id}/matrix', 'storeMatrix');
             Route::get('/{id}/matrix', 'showMatrix');
             Route::get('/{id}/tocs', 'getTocsForTD');

@@ -166,6 +166,19 @@ class TdController extends Controller
 
     }
 
+    public function update(int $id, Request $request)
+    {
+        $request->validate([
+            'array_table' => ['required'],
+        ]);
+        $td = Td::query()->where('id', '=', $id)->first();
+        $td->update(
+            [
+                'array_table' => $request->array_table
+            ]);
+        return response(['message' => 'Success'], 200);
+    }
+
     public function showMatrix(Request $request)
     {
         try {

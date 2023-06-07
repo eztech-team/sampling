@@ -100,7 +100,7 @@ class UserController extends Controller
 
     public function usersByRole()
     {
-        if (request()->isAdmin) {
+        if (request()->isAdmin && request()->isAdmin == 'true') {
             $admins = $this->checkUser(User::companyID())
                 ->where('role_id', '!=', Role::USER)
                 ->with('role:id,name')
