@@ -43,7 +43,7 @@ class IncomeTestController extends Controller
         $this->authorize('test-create');
 
         $is_new_or_edit_error = true;
-        if ($request->balance_test_id) {
+        if ($request->income_test_id) {
             $incomeTest = IncomeTest::find($request->income_test_id);
             if ($incomeTest->effectiveness == 40 || $incomeTest->effectiveness == 60 || $incomeTest->deviation == 40 || $incomeTest->deviation == 60) {
                 $is_new_or_edit_error = true;
@@ -70,7 +70,7 @@ class IncomeTestController extends Controller
                 ]);
             }
 
-            if (!isset($balanceTest)) {
+            if (!isset($incomeTest)) {
                 $incomeTest = IncomeTest::create([
                     'name' => $request->name,
                     'first_size' => $request->size,
@@ -154,7 +154,7 @@ class IncomeTestController extends Controller
         }
 
         if ($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60) {
-            return response(['message' => 'TOC’s неприменим', 'balance_test_id' => $balanceTest->id], 400);
+            return response(['message' => 'TOC’s неприменим', 'error' => ['effectiveness' => 'effectiveness not applicable', 'deviation' => 'deviation not applicable']], 422);
         }
         return response(['message' => 'Success', 'income_test_id' => $incomeTest->id], 200);
     }

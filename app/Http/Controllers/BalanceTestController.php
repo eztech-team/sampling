@@ -169,7 +169,7 @@ class BalanceTestController extends Controller
         }
 
         if ($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60) {
-            return response(['message' => 'TOC’s неприменим', 'balance_test_id' => $balanceTest->id], 400);
+            return response(['message' => 'TOC’s неприменим', 'error' => ['effectiveness' => 'effectiveness not applicable', 'deviation' => 'deviation not applicable']], 422);
         }
         return response(['message' => 'Success', 'balance_test_id' => $balanceTest->id], 200);
     }
