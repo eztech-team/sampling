@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Imports\ExcelImport;
 use App\Http\Traits\CreateDeleteFiles;
 use App\Models\Aggregate;
-use App\Models\IncomeItem;
+use App\Models\BalanceTest;use App\Models\IncomeItem;
 use App\Models\IncomeTest;
 use App\Models\IncomeTestExcel;
 use App\Rules\NatureControlRule;
@@ -29,6 +29,11 @@ class IncomeTestController extends Controller
                     $test->faq = json_decode($test->faq);
                 }
             }
+            if ($item->effectiveness == 40 || $item->effectiveness == 60 || $item->deviation == 40 || $item->deviation == 60) {
+                $item->is_valid = false;
+            } else {
+                $item->is_valid = true;
+            }
         }
         return response($balanceItem, 200);
     }
@@ -37,36 +42,65 @@ class IncomeTestController extends Controller
     {
         $this->authorize('test-create');
 
-        if(!$request->income_test_id){
-            $request->validate([
-                'income_test_id' => 'nullable',
-                'name' => ['required', 'max:255'],
-                'size' => ['required', 'integer'],
-                'array_table' => ['required'],
-                'aggregate_id' => ['required', 'exists:aggregates,id'],
-                'deviation' => ['required', 'string'],
-                'effectiveness' => ['required', 'string'],
-                'nature_control_id' => ['required', 'exists:nature_controls,id'],
-                'income_item_id' => ['required', 'exists:income_items,id'],
-                'method' => ['required', 'boolean'],
-                'first_comment' => ['nullable', 'max:255'],
-                'faq'  => ['nullable']
-            ]);
+        $is_new_or_edit_error = true;
+        if ($request->balance_test_id) {
+            $incomeTest = IncomeTest::find($request->income_test_id);
+            if ($incomeTest->effectiveness == 40 || $incomeTest->effectiveness == 60 || $incomeTest->deviation == 40 || $incomeTest->deviation == 60) {
+                $is_new_or_edit_error = true;
+            } else {
+                $is_new_or_edit_error = false;
+            }
+        }
 
-            $incomeTest = IncomeTest::create([
-                'name' => $request->name,
-                'first_size' => $request->size,
-                'array_table' => $request->array_table,
-                'aggregate_id' => $request->aggregate_id,
-                'deviation' => $request->deviation,
-                'effectiveness' => $request->effectiveness,
-                'nature_control_id' => $request->nature_control_id,
-                'income_item_id' => $request->income_item_id,
-                'method' => $request->method,
-                'first_comment' => $request->first_comment,
-                'faq'   => is_null($request->faq) ? null : json_encode($request->faq)
-            ]);
+        if($is_new_or_edit_error){
+            if (!($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60)) {
+                $request->validate([
+                    'income_test_id' => 'nullable',
+                    'name' => ['required', 'max:255'],
+                    'size' => ['required', 'integer'],
+                    'array_table' => ['required'],
+                    'aggregate_id' => ['required', 'exists:aggregates,id'],
+                    'deviation' => ['required', 'string'],
+                    'effectiveness' => ['required', 'string'],
+                    'nature_control_id' => ['required', 'exists:nature_controls,id'],
+                    'income_item_id' => ['required', 'exists:income_items,id'],
+                    'method' => ['required', 'boolean'],
+                    'first_comment' => ['nullable', 'max:255'],
+                    'faq' => ['nullable']
+                ]);
+            }
 
+            if (!isset($balanceTest)) {
+                $incomeTest = IncomeTest::create([
+                    'name' => $request->name,
+                    'first_size' => $request->size,
+                    'array_table' => $request->array_table,
+                    'aggregate_id' => $request->aggregate_id,
+                    'deviation' => $request->deviation,
+                    'effectiveness' => $request->effectiveness,
+                    'nature_control_id' => $request->nature_control_id,
+                    'income_item_id' => $request->income_item_id,
+                    'method' => $request->method,
+                    'first_comment' => $request->first_comment,
+                    'faq'   => is_null($request->faq) ? null : json_encode($request->faq)
+                ]);
+            } else {
+                $incomeTest->update(
+                    [
+                        'name' => $request->name,
+                        'first_size' => $request->size,
+                        'array_table' => $request->array_table,
+                        'aggregate_id' => $request->aggregate_id,
+                        'deviation' => $request->deviation,
+                        'effectiveness' => $request->effectiveness,
+                        'nature_control_id' => $request->nature_control_id,
+                        'income_item_id' => $request->income_item_id,
+                        'method' => $request->method,
+                        'first_comment' => $request->first_comment,
+                        'faq'   => is_null($request->faq) ? null : json_encode($request->faq)
+                    ]
+                );
+            }
             if($incomeTest->first_size){
                 $aggregate = Aggregate::find($request->aggregate_id);
                 $ignore = [];
@@ -83,9 +117,7 @@ class IncomeTestController extends Controller
                     $aggregate->path
                 );
             }
-        }
-
-        if($request->income_test_id){
+        } else {
             $incomeTest = IncomeTest::find($request->income_test_id);
             $request->validate([
                 'size' => ['required', 'integer'],
@@ -121,6 +153,9 @@ class IncomeTestController extends Controller
             }
         }
 
+        if ($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60) {
+            return response(['message' => 'TOC’s неприменим', 'balance_test_id' => $balanceTest->id], 400);
+        }
         return response(['message' => 'Success', 'income_test_id' => $incomeTest->id], 200);
     }
 
@@ -148,7 +183,11 @@ class IncomeTestController extends Controller
         if (!is_null($incomeTest->faq)) {
             $incomeTest->faq = json_decode($incomeTest->faq);
         }
-
+        if ($incomeTest->effectiveness == 40 || $incomeTest->effectiveness == 60 || $incomeTest->deviation == 40 || $incomeTest->deviation == 60) {
+            $incomeTest->is_valid = false;
+        } else {
+            $incomeTest->is_valid = true;
+        }
         return response($incomeTest,200);
     }
 

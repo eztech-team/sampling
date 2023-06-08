@@ -49,11 +49,26 @@ class BalanceTestController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(Request $request)
     {
         $this->authorize('test-create');
+        $is_new_or_edit_error = true;
+        if ($request->balance_test_id) {
+            $balanceTest = BalanceTest::find($request->balance_test_id);
+            if ($balanceTest->effectiveness == 40 || $balanceTest->effectiveness == 60 || $balanceTest->deviation == 40 || $balanceTest->deviation == 60) {
+                $is_new_or_edit_error = true;
+            } else {
+                $is_new_or_edit_error = false;
+            }
+        }
 
-        if (!$request->balance_test_id) {
+        if ($is_new_or_edit_error) {
             if (!($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60)) {
                 $request->validate([
                     'balance_test_id' => 'nullable',
@@ -70,20 +85,37 @@ class BalanceTestController extends Controller
                     'faq' => ['nullable']
                 ]);
             }
-            $balanceTest = BalanceTest::create([
-                'name' => $request->name,
-                'first_size' => $request->size,
-                'array_table' => $request->array_table,
-                'aggregate_id' => $request->aggregate_id,
-                'deviation' => $request->deviation,
-                'effectiveness' => $request->effectiveness,
-                'nature_control_id' => $request->nature_control_id,
-                'balance_item_id' => $request->balance_item_id,
-                'method' => $request->method,
-                'first_comment' => $request->first_comment,
-                'faq' => is_null($request->faq) ? null : json_encode($request->faq)
-            ]);
-
+            if (!isset($balanceTest)) {
+                $balanceTest = BalanceTest::query()->create([
+                    'name' => $request->name,
+                    'first_size' => $request->size,
+                    'array_table' => $request->array_table,
+                    'aggregate_id' => $request->aggregate_id,
+                    'deviation' => $request->deviation,
+                    'effectiveness' => $request->effectiveness,
+                    'nature_control_id' => $request->nature_control_id,
+                    'balance_item_id' => $request->balance_item_id,
+                    'method' => $request->method,
+                    'first_comment' => $request->first_comment,
+                    'faq' => is_null($request->faq) ? null : json_encode($request->faq)
+                ]);
+            } else {
+                $balanceTest->update(
+                    [
+                        'name' => $request->name,
+                        'first_size' => $request->size,
+                        'array_table' => $request->array_table,
+                        'aggregate_id' => $request->aggregate_id,
+                        'deviation' => $request->deviation,
+                        'effectiveness' => $request->effectiveness,
+                        'nature_control_id' => $request->nature_control_id,
+                        'balance_item_id' => $request->balance_item_id,
+                        'method' => $request->method,
+                        'first_comment' => $request->first_comment,
+                        'faq' => is_null($request->faq) ? null : json_encode($request->faq)
+                    ]
+                );
+            }
             if ($balanceTest->first_size) {
                 $aggregate = Aggregate::find($request->aggregate_id);
                 $ignore = [];
@@ -100,10 +132,7 @@ class BalanceTestController extends Controller
                     $aggregate->path
                 );
             }
-        }
-
-        if ($request->balance_test_id) {
-            $balanceTest = BalanceTest::find($request->balance_test_id);
+        } else{
             if (!($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60)) {
                 $request->validate([
                     'size' => ['required', 'integer'],
@@ -114,65 +143,12 @@ class BalanceTestController extends Controller
                         new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)],
                 ]);
             }
+            $balanceTest->update([
+                'second_size' => $request->size,
+                'second_comment' => $request->second_comment,
+                'first_comment' => $request->first_comment,
+            ]);
 
-            if ($request->second_size) {
-                $update_data['second_size'] = $request->second_size;
-            }if ($request->second_comment) {
-                $update_data['second_comment'] = $request->second_comment;
-            }if ($request->first_comment) {
-                $update_data['first_comment'] = $request->first_comment;
-            }
-            if ($request->name) {
-                $update_data['name'] = $request->name;
-            }
-            if ($request->first_size) {
-                $update_data['first_size'] = $request->first_size;
-            }
-            if ($request->array_table) {
-                $update_data['array_table'] = $request->array_table;
-            }
-            if ($request->aggregate_id) {
-                $update_data['aggregate_id'] = $request->aggregate_id;
-            }
-            if ($request->deviation) {
-                $update_data['deviation'] = $request->deviation;
-            }
-            if ($request->effectiveness) {
-                $update_data['effectiveness'] = $request->effectiveness;
-            }
-            if ($request->nature_control_id) {
-                $update_data['nature_control_id'] = $request->nature_control_id;
-            }
-            if ($request->balance_item_id) {
-                $update_data['balance_item_id'] = $request->balance_item_id;
-            }
-            if ($request->method) {
-                $update_data['method'] = $request->method;
-            }
-            if ($request->first_comment) {
-                $update_data['first_comment'] = $request->first_comment;
-            }
-            if ($request->faq) {
-                $update_data['faq'] = json_encode($request->faq);
-            }
-            $balanceTest->update($update_data);
-
-            if ($balanceTest->first_size) {
-                $aggregate = Aggregate::find($request->aggregate_id);
-                $ignore = [];
-                if ($aggregate->title) {
-                    $ignore = [1];
-                }
-
-                Excel::import(
-                    new ExcelImport(
-                        random: $request->size,
-                        ignore: $ignore,
-                        method: $request->method,
-                        balanceTestId: $balanceTest->id),
-                    $aggregate->path
-                );
-            }
             if ($balanceTest->second_size) {
                 $aggregate = Aggregate::find($balanceTest->aggregate_id);
                 $balanceTestExcel = BalanceTestExcel::where('balance_test_id', $balanceTest->id)->first()->data;
@@ -191,8 +167,9 @@ class BalanceTestController extends Controller
                         balanceTestId: $balanceTest->id), $aggregate->path);
             }
         }
+
         if ($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60) {
-            return response(['message' => 'TOC’s неприменим', 'errors' => ['effectiveness' => ['error'], 'deviation' => ['error']]], 422);
+            return response(['message' => 'TOC’s неприменим', 'balance_test_id' => $balanceTest->id], 400);
         }
         return response(['message' => 'Success', 'balance_test_id' => $balanceTest->id], 200);
     }
