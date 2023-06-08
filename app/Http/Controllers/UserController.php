@@ -52,6 +52,48 @@ class UserController extends Controller
         return response(['message' => 'Message sent successfully'], 200);
     }
 
+    public function show(Request $request)
+    {
+        $user = User::query()
+            ->where('id', '=', $request->user_id)
+            ->first();
+
+        $projects = [];
+        foreach ($user->projects as $project) {
+            $members = [];
+            foreach ($project->users as $member) {
+                $members[] = [
+                    'id'      => $member->id,
+                    'name'    => $member->name,
+                    'surname' => $user->surname,
+                ];
+            }
+            $projects[] = [
+                'id'      => $project->id,
+                'name'    => $project->name,
+                'members' => $members
+            ];
+        }
+        $teams = [];
+        foreach ($user->teams as $team) {
+            $teams[] = [
+                'id' => $team->id,
+                'name' => $team->name
+            ];
+        }
+        $positions = [];
+
+        $result = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'surname' => $user->surname,
+            'email' => $user->email,
+            'projects' => $projects,
+            'teams' => $teams,
+            'positions' => $positions
+        ];
+        return response($result, 200);
+    }
     public function createUser(Request $request)
     {
         $data = $request->validate([

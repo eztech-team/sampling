@@ -78,6 +78,7 @@ Route::prefix('companies')->group(function (){
         ->group(function (){
             Route::post('send-notification', 'sendNotification');
             Route::get('users', 'users');
+            Route::get('users/{user_id}', 'show');
             Route::get('users/role', 'usersByRole');
             Route::put( 'users/{user_id}', 'updateUser');
             Route::post('add-project-team', 'addUserToProjectsAndTeam');
@@ -123,7 +124,8 @@ Route::middleware(['auth:sanctum', 'check.company'])->group(function(){
             Route::get('/', 'index');
             Route::post( '/', 'store');
             Route::get('/{balanceItem}', 'show');
-            Route::put( '/{balanceItem}', 'update')->middleware('check.project');
+            Route::put( '/{balanceItem}', 'update');
+//            ->middleware('check.project');
             Route::delete('/{balanceItem}', 'destroy')->middleware('check.project');;
         });
     });
