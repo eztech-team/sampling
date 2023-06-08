@@ -54,20 +54,22 @@ class BalanceTestController extends Controller
         $this->authorize('test-create');
 
         if(!$request->balance_test_id){
-            $request->validate([
-                'balance_test_id' => 'nullable',
-                'name' => ['required', 'max:255'],
-                'size' => ['required', 'integer'],
-                'array_table' => ['required'],
-                'aggregate_id' => ['required', 'exists:aggregates,id'],
-                'deviation' => ['required', 'string'],
-                'effectiveness' => ['required', 'string'],
-                'nature_control_id' => ['required', 'exists:nature_controls,id'],
-                'balance_item_id' => ['required', 'exists:balance_items,id'],
-                'method' => ['required', 'boolean'],
-                'first_comment' => ['nullable', 'max:255'],
-                'faq'  => ['nullable']
-            ]);
+            if (!($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60)) {
+                $request->validate([
+                    'balance_test_id' => 'nullable',
+                    'name' => ['required', 'max:255'],
+                    'size' => ['required', 'integer'],
+                    'array_table' => ['required'],
+                    'aggregate_id' => ['required', 'exists:aggregates,id'],
+                    'deviation' => ['required', 'string'],
+                    'effectiveness' => ['required', 'string'],
+                    'nature_control_id' => ['required', 'exists:nature_controls,id'],
+                    'balance_item_id' => ['required', 'exists:balance_items,id'],
+                    'method' => ['required', 'boolean'],
+                    'first_comment' => ['nullable', 'max:255'],
+                    'faq' => ['nullable']
+                ]);
+            }
             $balanceTest = BalanceTest::create([
                 'name' => $request->name,
                 'first_size' => $request->size,
@@ -102,14 +104,16 @@ class BalanceTestController extends Controller
 
         if($request->balance_test_id){
             $balanceTest = BalanceTest::find($request->balance_test_id);
-            $request->validate([
-                'size' => ['required', 'integer'],
-                'first_comment' => ['nullable', 'max:255'],
-                'second_comment' => ['nullable', 'max:255'],
-                'nature_control_id' => [
-                    'exists:nature_controls,id',
-                    new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)],
-            ]);
+            if (!($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60)) {
+                $request->validate([
+                    'size' => ['required', 'integer'],
+                    'first_comment' => ['nullable', 'max:255'],
+                    'second_comment' => ['nullable', 'max:255'],
+                    'nature_control_id' => [
+                        'exists:nature_controls,id',
+                        new NatureControlRule(natureControlID: $balanceTest->nature_control_id, balanceID: $balanceTest->id)],
+                ]);
+            }
             $balanceTest->update([
                 'second_size' => $request->size,
                 'second_comment' => $request->second_comment,
