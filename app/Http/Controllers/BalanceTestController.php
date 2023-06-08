@@ -34,6 +34,11 @@ class BalanceTestController extends Controller
                     $test->faq = json_decode($test->faq);
                 }
             }
+            if ($item->effectiveness == 40 || $item->effectiveness == 60 || $item->deviation == 40 || $item->deviation == 60) {
+                $item->is_valid = false;
+            } else {
+                $item->is_valid = true;
+            }
         }
         return response($balanceItem, 200);
     }
@@ -129,7 +134,9 @@ class BalanceTestController extends Controller
                         balanceTestId: $balanceTest->id), $aggregate->path);
             }
         }
-
+        if ($request->effectiveness == 40 || $request->effectiveness == 60 || $request->deviation == 40 || $request->deviation == 60) {
+            return response(['message' => 'TOC’s неприменим', 'balance_test_id' => $balanceTest->id], 400);
+        }
         return response(['message' => 'Success', 'balance_test_id' => $balanceTest->id], 200);
     }
 
@@ -174,6 +181,11 @@ class BalanceTestController extends Controller
             ->with(['aggregate', 'natureControl'])->first();
         if (!is_null($balanceTest->faq)) {
             $balanceTest->faq = json_decode($balanceTest->faq);
+        }
+        if ($balanceTest->effectiveness == 40 || $balanceTest->effectiveness == 60 || $balanceTest->deviation == 40 || $balanceTest->deviation == 60) {
+            $balanceTest->is_valid = false;
+        } else {
+            $balanceTest->is_valid = true;
         }
         return response($balanceTest,200);
     }
