@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Aggregate;
 use App\Models\Td;
 use App\Models\TdExcel;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Exception;
@@ -32,6 +33,7 @@ class SampleController extends Controller
         $td_excels = TdExcel::query()
             ->where('td_id', $id)
             ->get();
+
         foreach ($td_excels as $excel) {
             $aggregate = Aggregate::query()->where('id', $excel->aggregate_id)->first();
             $excels[] = [
@@ -39,6 +41,7 @@ class SampleController extends Controller
                 'amount_column' => $aggregate->amount_column
             ];
         }
+        $td->td_method = 3;
         switch ($td->td_method) {
             case 1:
 //                if (file_exists(self::BASE_PATH . "$td->id-vws.xlsx")) {
@@ -94,42 +97,38 @@ class SampleController extends Controller
             $rows = $worksheet->toArray();
             unset($rows[0]);
             foreach ($rows as $row) {
-                $total_population += (int)(int)str_replace(',', '', $row[10]);
+                $total_population += (int)str_replace(',', '', $row[$excel_file['amount_column']  + 1]);
                 $count_population += 1;
             }
             $random_numbers = [];
-            for ($i = 0; $i < $sample_size; $i++) {
-                $random_numbers[] = rand(2, $excel_file['amount_column']);
+            for ($i = 0; $i < ($sample_size/count($excels)); $i++) {
+                $random_numbers[] = rand(1, count($rows));
             }
             foreach ($random_numbers as $random_number) {
-                $sample_rows[] = $worksheet->rangeToArray("A$random_number:K$random_number", null, true, true, true)[$random_number];
+                $item = $rows[$random_number];
+                unset($item[0]);
+                $item['total'] = (int)str_replace(',', '',$item[$excel_file['amount_column']  + 1]);
+                $sample_rows[] = $item;
             }
         }
+
         $spreadsheet = new Spreadsheet();
-        $worksheet = $spreadsheet->getActiveSheet();
-        $worksheet->fromArray(['Период', '№', 'Счет Дт', 'Количество Дт', 'Валюта Дт', 'Вал. сумма Дт', 'Счет Кт', 'Количество Кт', 'Валюта Кт', 'Вал. сумма Кт', 'Сумма']);
-
-        $row_index = 2;
-        foreach ($sample_rows as $row) {
+        $sheet = $spreadsheet->getActiveSheet();
+        $row = 1;
+        foreach ($sample_rows as $item) {
+            $sheet->setCellValue('A' . $row, $item['total']);
+            $total_sample     += $item['total'];
+            unset($item['total']);
+            foreach ($item as $key => $value) {
+                $sheet->setCellValue($this->getCoordinate($key) . $row, $value);
+            }
+            $row++;
             $count_sample     += 1;
-            $total_sample     += (int)str_replace(',', '', $row['K']);
-            $worksheet->setCellValue("A$row_index", $row["A"])
-                ->setCellValue("B$row_index", $row["B"])
-                ->setCellValue("C$row_index", $row["C"])
-                ->setCellValue("D$row_index", $row["D"])
-                ->setCellValue("E$row_index", $row["E"])
-                ->setCellValue("F$row_index", $row["F"])
-                ->setCellValue("G$row_index", $row["G"])
-                ->setCellValue("H$row_index", $row["H"])
-                ->setCellValue("I$row_index", $row["I"])
-                ->setCellValue("J$row_index", $row["J"])
-                ->setCellValue("K$row_index", $row["K"]);
-            $row_index++;
         }
-
         $path = self::BASE_PATH . "$td_id-haphazard-sampling.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
+
         $highestRow = $sample_size + 1;
         Td::query()
             ->where('id', $td_id)
@@ -163,30 +162,19 @@ class SampleController extends Controller
             $worksheet = $spreadsheet->getActiveSheet();
             $rows = $worksheet->toArray();
             unset($rows[0]);
+
             foreach ($rows as $row) {
-                $total_population += (int) $row[10];
+                $total_population += (int)str_replace(',', '', $row[$excel_file['amount_column']  + 1]);
                 $count_population += 1;
-                $data[] = [
-                    'period' => $row[0],      // A-период
-                    'number' => $row[1],      // B-номер
-                    'account_dt' => $row[2],  // C-Счет Дт
-                    'quantity_dt' => $row[3], // D-Количество Дт
-                    'currency_dt' => $row[4], // E-Валюта Дт
-                    'amount_dt' => $row[5],   // F-Вал. сумма Дт
-                    'account_kt' => $row[6],  // G-Счет Кт
-                    'quantity_kt' => $row[7], // H-Количество Кт
-                    'currency_kt' => $row[8], // I-Валюта Кт
-                    'amount_kt' => $row[9],   // J-Вал. сумма Кт
-                    'total' => $row[10],      // K-Сумма
-                ];
+                unset($row[0]);
+                $row['total'] = (int)str_replace(',', '',$row[$excel_file['amount_column']  + 1]);
+                $data[] = $row;
             }
         }
 
         $filteredData = [];
         foreach ($data as $item) {
             if (
-                $item['amount_dt'] >= $minimum_value &&
-                $item['amount_kt'] >= $minimum_value &&
                 $item['total'] >= $minimum_value
             ) {
                 $filteredData[] = $item;
@@ -201,34 +189,16 @@ class SampleController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'Период');
-        $sheet->setCellValue('B1', '№');
-        $sheet->setCellValue('C1', 'Счет Дт');
-        $sheet->setCellValue('D1', 'Количество Дт');
-        $sheet->setCellValue('E1', 'Валюта Дт');
-        $sheet->setCellValue('F1', 'Вал. сумма Дт');
-        $sheet->setCellValue('G1', 'Счет Кт');
-        $sheet->setCellValue('H1', 'Количество Кт');
-        $sheet->setCellValue('I1', 'Валюта Кт');
-        $sheet->setCellValue('J1', 'Вал. сумма Кт');
-        $sheet->setCellValue('K1', 'Сумма');
-        $row = 2;
+        $row = 1;
         foreach ($sample as $item) {
-            $count_sample     += 1;
-            $total_sample     += (int)str_replace(',', '', $item['total']);
-            $sheet->setCellValue('A' . $row, $item['period']);
-            $sheet->setCellValue('B' . $row, $item['number']);
-            $sheet->setCellValue('C' . $row, $item['account_dt']);
-            $sheet->setCellValue('D' . $row, $item['quantity_dt']);
-            $sheet->setCellValue('E' . $row, $item['currency_dt']);
-            $sheet->setCellValue('F' . $row, $item['amount_dt']);
-            $sheet->setCellValue('G' . $row, $item['account_kt']);
-            $sheet->setCellValue('H' . $row, $item['quantity_kt']);
-            $sheet->setCellValue('I' . $row, $item['currency_kt']);
-            $sheet->setCellValue('J' . $row, $item['amount_kt']);
-            $sheet->setCellValue('K' . $row, $item['total']);
-
+            $sheet->setCellValue('A' . $row, $item['total']);
+            $total_sample     += $item['total'];
+            unset($item['total']);
+            foreach ($item as $key => $value) {
+                $sheet->setCellValue($this->getCoordinate($key) . $row, $value);
+            }
             $row++;
+            $count_sample     += 1;
         }
         $path = self::BASE_PATH . "$td_id-mus.xlsx";
         $writer = new Xlsx($spreadsheet);
@@ -252,46 +222,26 @@ class SampleController extends Controller
         ];
     }
 
-    private function valueWeightedSelection(int $td_id, array $excels, int $sample_size, int $minimum_value = 1000000): array
+    private function valueWeightedSelection(int $td_id, array $excels, int $sample_size): array
     {
         $data = [];
         $total_population = 0; //total_population - общая сумма всех excel файлов
         $count_population = 0; //count_population - количество строк в excel файлах
         $count_sample     = 0; //count_sample - длинна итогового excel файла
         $total_sample     = 0; //total_sample - общая цена итого excel файла
-
         foreach ($excels as $excel_file) {
-            $spreadsheet = IOFactory::load($excel_file['path']);
+            $spreadsheet = IOFactory::load(Storage::path($excel_file['path']));
             $worksheet = $spreadsheet->getActiveSheet();
             $rows = $worksheet->toArray();
             unset($rows[0]);
             foreach ($rows as $row) {
-                $total_population += (int)str_replace(',', '', $row[10]);
+                $total_population += (int)str_replace(',', '', $row[$excel_file['amount_column']  + 1]);
                 $count_population += 1;
-                $item = [
-                    'period' => $row[0],      // A-период
-                    'number' => $row[1],      // B-номер
-                    'account_dt' => $row[2],  // C-Счет Дт
-                    'quantity_dt' => $row[3], // D-Количество Дт
-                    'currency_dt' => $row[4], // E-Валюта Дт
-                    'amount_dt' => $row[5],   // F-Вал. сумма Дт
-                    'account_kt' => $row[6],  // G-Счет Кт
-                    'quantity_kt' => $row[7], // H-Количество Кт
-                    'currency_kt' => $row[8], // I-Валюта Кт
-                    'amount_kt' => $row[9],   // J-Вал. сумма Кт
-                    'total' => (int)str_replace(',', '', $row[10]),      // K-Сумма
-                ];
-
-                if (
-                    $item['amount_dt'] >= $minimum_value &&
-                    $item['amount_kt'] >= $minimum_value &&
-                    $item['total'] >= $minimum_value
-                ) {
-                    $data[] = $item;
-                }
+                unset($row[0]);
+                $row['total'] = (int)str_replace(',', '',$row[$excel_file['amount_column']  + 1]);
+                $data[] = $row;
             }
         }
-
         unset($data[0]);
         // Шаг 1: Проверка, достаточно ли данных для формирования выборки
         if (count($data) < $sample_size) {
@@ -338,35 +288,16 @@ class SampleController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'Период');
-        $sheet->setCellValue('B1', '№');
-        $sheet->setCellValue('C1', 'Счет Дт');
-        $sheet->setCellValue('D1', 'Количество Дт');
-        $sheet->setCellValue('E1', 'Валюта Дт');
-        $sheet->setCellValue('F1', 'Вал. сумма Дт');
-        $sheet->setCellValue('G1', 'Счет Кт');
-        $sheet->setCellValue('H1', 'Количество Кт');
-        $sheet->setCellValue('I1', 'Валюта Кт');
-        $sheet->setCellValue('J1', 'Вал. сумма Кт');
-        $sheet->setCellValue('K1', 'Сумма');
-
-        $row = 2;
+        $row = 1;
         foreach ($sample as $item) {
-            $count_sample     += 1;
+            $sheet->setCellValue('A' . $row, $item['total']);
             $total_sample     += $item['total'];
-            $sheet->setCellValue('A' . $row, $item['period']);
-            $sheet->setCellValue('B' . $row, $item['number']);
-            $sheet->setCellValue('C' . $row, $item['account_dt']);
-            $sheet->setCellValue('D' . $row, $item['quantity_dt']);
-            $sheet->setCellValue('E' . $row, $item['currency_dt']);
-            $sheet->setCellValue('F' . $row, $item['amount_dt']);
-            $sheet->setCellValue('G' . $row, $item['account_kt']);
-            $sheet->setCellValue('H' . $row, $item['quantity_kt']);
-            $sheet->setCellValue('I' . $row, $item['currency_kt']);
-            $sheet->setCellValue('J' . $row, $item['amount_kt']);
-            $sheet->setCellValue('K' . $row, $item['total']);
-
+            unset($item['total']);
+            foreach ($item as $key => $value) {
+                $sheet->setCellValue($this->getCoordinate($key) . $row, $value);
+            }
             $row++;
+            $count_sample     += 1;
         }
 
         $path = self::BASE_PATH . "$td_id-vws.xlsx";
@@ -449,5 +380,19 @@ class SampleController extends Controller
     {
         $interval = $total_population/$td_size;
         return ($td_size/$td_size * $interval) + ((2 * $interval)/($interval * 2));
+    }
+
+    private function getCoordinate($columnIndex): string
+    {
+        $letters = range('A', 'Z');
+        $columnAddress = '';
+
+        while ($columnIndex >= 0) {
+            $remainder = $columnIndex % 26;
+            $columnAddress = $letters[$remainder] . $columnAddress;
+            $columnIndex = intval($columnIndex / 26) - 1;
+        }
+
+        return $columnAddress;
     }
 }
