@@ -41,7 +41,6 @@ class SampleController extends Controller
                 'amount_column' => $aggregate->amount_column
             ];
         }
-        $td->td_method = 3;
         switch ($td->td_method) {
             case 1:
 //                if (file_exists(self::BASE_PATH . "$td->id-vws.xlsx")) {
